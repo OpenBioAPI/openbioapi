@@ -94,9 +94,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .cache/generation-hashes.json
-          key: clojure-clients-${{ steps.generator-version.outputs.digest }}
+          key: clojure-clients-hashes-${{ steps.generator-version.outputs.digest }}
           restore-keys: |
-            clojure-clients-
+            clojure-clients-hashes-
 
       - name: Check for changes and filter specs
         id: check-changes
@@ -241,6 +241,10 @@ jobs:
             }
             
             // Helper function to validate and sanitize git tag
+            // Transforms version strings to valid git tag format:
+            // - Removes invalid characters (keeps alphanumeric, dots, hyphens, underscores)
+            // - Prepends 'v' if tag starts with a number (e.g., '1.0.0' -> 'v1.0.0')
+            // - Returns null for empty or invalid versions
             function sanitizeTag(version) {
               if (!version || version === 'null' || version === '') return null;
               // Remove any characters that are not valid in git tags
@@ -324,6 +328,7 @@ jobs:
                     GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin main`;
                   
                   // Add tag creation and push if we have a valid version
+                  // Note: Uses force push (-f) to update tag if it exists (e.g., when regenerating)
                   if (gitTag) {
                     console.log(`Creating tag: ${gitTag} for API version: ${apiVersion}`);
                     gitCommands += ` && \
@@ -498,4 +503,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: .cache/generation-hashes.json
-          key: clojure-clients-${{ steps.generator-version.outputs.digest }}-${{ github.run_id }}
+          key: clojure-clients-hashes-${{ steps.generator-version.outputs.digest }}
