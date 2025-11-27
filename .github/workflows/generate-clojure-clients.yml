@@ -129,7 +129,7 @@ jobs:
               return;
             }
             
-            const octokit = getOctokit(token);
+            const octokitClient = getOctokit(token);
             
             const results = [];
             
@@ -157,7 +157,7 @@ jobs:
               try {
                 // First, try to create as user repo
                 try {
-                  await octokit.rest.repos.createForAuthenticatedUser({
+                  await octokitClient.rest.repos.createForAuthenticatedUser({
                     name: repoName,
                     description: `Auto-generated Clojure client for ${client.spec_name} API`,
                     private: privateClients,
@@ -170,7 +170,7 @@ jobs:
                   } else if (createError.status === 403 || createError.status === 401) {
                     // Try to create in org
                     try {
-                      await octokit.rest.repos.createInOrg({
+                      await octokitClient.rest.repos.createInOrg({
                         org: targetOwner,
                         name: repoName,
                         description: `Auto-generated Clojure client for ${client.spec_name} API`,
@@ -263,12 +263,12 @@ jobs:
             const targetOwner = process.env.TARGET_OWNER;
             const metaRepo = process.env.META_REPO;
             
-            const octokit = getOctokit(token);
+            const octokitClient = getOctokit(token);
             
             // Try to ensure meta repo exists
             try {
               try {
-                await octokit.rest.repos.createForAuthenticatedUser({
+                await octokitClient.rest.repos.createForAuthenticatedUser({
                   name: metaRepo,
                   description: 'Meta repository tracking auto-generated Clojure API clients',
                   private: false,
@@ -279,7 +279,7 @@ jobs:
                 if (createError.status !== 422) {
                   // Try org creation
                   try {
-                    await octokit.rest.repos.createInOrg({
+                    await octokitClient.rest.repos.createInOrg({
                       org: targetOwner,
                       name: metaRepo,
                       description: 'Meta repository tracking auto-generated Clojure API clients',
@@ -311,7 +311,7 @@ jobs:
               // Check if file exists
               let sha = null;
               try {
-                const { data: existingFile } = await octokit.rest.repos.getContent({
+                const { data: existingFile } = await octokitClient.rest.repos.getContent({
                   owner: targetOwner,
                   repo: metaRepo,
                   path: 'clients.json'
@@ -321,7 +321,7 @@ jobs:
                 // File doesn't exist yet
               }
               
-              await octokit.rest.repos.createOrUpdateFileContents({
+              await octokitClient.rest.repos.createOrUpdateFileContents({
                 owner: targetOwner,
                 repo: metaRepo,
                 path: 'clients.json',
