@@ -104,7 +104,7 @@ jobs:
 
       - name: Create target repositories and push clients
         if: steps.discover.outputs.specs_found == 'true'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
@@ -129,7 +129,7 @@ jobs:
               return;
             }
             
-            const octokit = github.getOctokit(token);
+            const octokit = getOctokit(token);
             
             const results = [];
             
@@ -236,7 +236,7 @@ jobs:
 
       - name: Update meta repository
         if: steps.discover.outputs.specs_found == 'true'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
@@ -263,7 +263,7 @@ jobs:
             const targetOwner = process.env.TARGET_OWNER;
             const metaRepo = process.env.META_REPO;
             
-            const octokit = github.getOctokit(token);
+            const octokit = getOctokit(token);
             
             // Try to ensure meta repo exists
             try {
