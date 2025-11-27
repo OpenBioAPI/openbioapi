@@ -11,8 +11,9 @@ The workflow:
 3. **Generates** Clojure clients using the official `openapitools/openapi-generator-cli:latest` Docker image
 4. **Creates** target repositories named `clj-<spec-name>-client` under the specified owner (private by default)
 5. **Tags** each client repository with the API version from the spec (if `info.version` is specified)
-6. **Pushes** the generated code to each client repository
-7. **Updates** a meta repository with a `clients.json` file tracking all generated clients
+6. **Preserves existing content** - if a client repository already exists, the workflow clones it first and merges generated code with existing files (tests, workflows, etc.)
+7. **Pushes** the generated code to each client repository
+8. **Updates** a meta repository with a `clients.json` file tracking all generated clients
 
 ## Setup
 
@@ -70,6 +71,21 @@ If your OpenAPI spec includes a version in the `info.version` field, the workflo
 3. Push the tag to the remote repository
 
 This allows consumers to pin to specific API versions using git tags.
+
+## Preserving Existing Content
+
+When a client repository already exists, the workflow:
+
+1. **Clones** the existing repository first
+2. **Merges** the newly generated code with existing files using `rsync`
+3. **Commits only the changes** (no force push)
+
+This means:
+- Tests, workflows, and other manually added files in client repos are preserved
+- Only files that the generator produces are updated
+- The git history is maintained (not replaced)
+
+**Note:** If generated files and manually added files have the same name, the generated files will overwrite them. To avoid conflicts, keep your custom code in separate directories (e.g., `test/`, `.github/workflows/`).
 
 ## Generated Repository Naming
 

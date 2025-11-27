@@ -267,6 +267,8 @@ jobs:
                 continue;
               }
               
+              let repoExists = false;
+              
               // Try to create repository (it may already exist)
               try {
                 // First, try to create as user repo
@@ -281,6 +283,7 @@ jobs:
                 } catch (createError) {
                   if (createError.status === 422) {
                     console.log(`Repository ${repoName} already exists`);
+                    repoExists = true;
                   } else if (createError.status === 403 || createError.status === 401) {
                     // Try to create in org
                     try {
@@ -295,6 +298,7 @@ jobs:
                     } catch (orgError) {
                       if (orgError.status === 422) {
                         console.log(`Repository ${targetOwner}/${repoName} already exists`);
+                        repoExists = true;
                       } else {
                         throw orgError;
                       }
@@ -314,26 +318,60 @@ jobs:
                 const commitMessage = `Auto-generated Clojure client from ${client.spec_path}`.replace(/["`$\\]/g, '');
                 
                 try {
-                  // Build git commands - always push to main
-                  let gitCommands = `
-                    cd ${shellEscape(outputDir)} && \
-                    git init && \
-                    git config user.email "github-actions[bot]@users.noreply.github.com" && \
-                    git config user.name "github-actions[bot]" && \
-                    git config credential.helper '!f() { echo "password=$GIT_TOKEN"; }; f' && \
-                    git add -A && \
-                    git commit -m ${shellEscape(commitMessage)} --allow-empty && \
-                    git branch -M main && \
-                    git remote add origin ${shellEscape(repoUrlNoToken)} && \
-                    GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin main`;
+                  let gitCommands;
                   
-                  // Add tag creation and push if we have a valid version
-                  // Note: Uses force push (-f) to update tag if it exists (e.g., when regenerating)
-                  if (gitTag) {
-                    console.log(`Creating tag: ${gitTag} for API version: ${apiVersion}`);
+                  if (repoExists) {
+                    // For existing repos: clone, copy generated files over, commit changes
+                    // This preserves any manually added files (tests, workflows, etc.)
+                    const cloneDir = `${outputDir}_existing`;
+                    console.log(`Cloning existing repository to preserve manual additions...`);
+                    
+                    gitCommands = `
+                      GIT_ASKPASS=echo git -c credential.username=x-access-token clone ${shellEscape(repoUrlNoToken)} ${shellEscape(cloneDir)} && \
+                      cd ${shellEscape(cloneDir)} && \
+                      git config user.email "github-actions[bot]@users.noreply.github.com" && \
+                      git config user.name "github-actions[bot]" && \
+                      rsync -av --exclude='.git' ${shellEscape(outputDir)}/ . && \
+                      git add -A && \
+                      git diff --cached --quiet || git commit -m ${shellEscape(commitMessage)}`;
+                    
+                    // Add tag creation if we have a valid version
+                    // Note: Uses force flag (-f) to update tag if version hasn't changed
+                    if (gitTag) {
+                      console.log(`Creating tag: ${gitTag} for API version: ${apiVersion}`);
+                      gitCommands += ` && \
+                      git tag -f ${shellEscape(gitTag)}`;
+                    }
+                    
+                    // Push changes (not force push, to preserve history)
                     gitCommands += ` && \
-                    git tag -f ${shellEscape(gitTag)} && \
-                    GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin ${shellEscape(gitTag)}`;
+                      GIT_ASKPASS=echo git -c credential.username=x-access-token push origin main`;
+                    
+                    // Push tag if created
+                    if (gitTag) {
+                      gitCommands += ` && \
+                      GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin ${shellEscape(gitTag)}`;
+                    }
+                  } else {
+                    // For new repos: initialize and push
+                    gitCommands = `
+                      cd ${shellEscape(outputDir)} && \
+                      git init && \
+                      git config user.email "github-actions[bot]@users.noreply.github.com" && \
+                      git config user.name "github-actions[bot]" && \
+                      git add -A && \
+                      git commit -m ${shellEscape(commitMessage)} --allow-empty && \
+                      git branch -M main && \
+                      git remote add origin ${shellEscape(repoUrlNoToken)} && \
+                      GIT_ASKPASS=echo git -c credential.username=x-access-token push origin main`;
+                    
+                    // Add tag creation and push if we have a valid version
+                    if (gitTag) {
+                      console.log(`Creating tag: ${gitTag} for API version: ${apiVersion}`);
+                      gitCommands += ` && \
+                      git tag ${shellEscape(gitTag)} && \
+                      GIT_ASKPASS=echo git -c credential.username=x-access-token push origin ${shellEscape(gitTag)}`;
+                    }
                   }
                   
                   // Use environment variable for token instead of embedding in URL
