@@ -13,7 +13,7 @@
 #
 # Features:
 #   - Uses --skip-validate-spec to handle specs that may have minor validation issues
-#   - Ensures generated files are writable
+#   - Runs Docker with current user UID/GID so generated files are owned by the runner
 #
 
 set -euo pipefail
@@ -46,7 +46,9 @@ echo "Generating Clojure client for: $SPEC_PATH"
 echo "Output directory: $OUTPUT_DIR"
 
 # Run openapi-generator-cli via Docker
+# Use current user UID/GID to ensure generated files are owned by the runner user
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v "${SPEC_DIR}:/spec:ro" \
   -v "${OUTPUT_ABS_PATH}:/output" \
   openapitools/openapi-generator-cli:latest generate \
@@ -54,8 +56,5 @@ docker run --rm \
   -g clojure \
   -o /output \
   --skip-validate-spec
-
-# Ensure generated files are writable
-chmod -R u+w "$OUTPUT_ABS_PATH" || true
 
 echo "Successfully generated Clojure client in: $OUTPUT_DIR"
