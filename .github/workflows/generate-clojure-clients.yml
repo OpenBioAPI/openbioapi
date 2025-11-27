@@ -11,7 +11,8 @@ on:
 env:
   TARGET_OWNER: ${{ vars.TARGET_OWNER || 'Schmoho' }}
   META_REPO: ${{ vars.META_REPO || 'openbioapi-clients-meta' }}
-  PRIVATE_CLIENTS: ${{ vars.PRIVATE_CLIENTS || 'false' }}
+  PRIVATE_CLIENTS: ${{ vars.PRIVATE_CLIENTS || 'true' }}
+  GENERATOR_IMAGE: openapitools/openapi-generator-cli:latest
 
 jobs:
   generate-clients:
@@ -26,7 +27,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq
+          sudo apt-get install -y jq yq
+
+      - name: Get generator version for caching
+        id: generator-version
+        run: |
+          # Pull the docker image and get its digest for cache key
+          docker pull ${{ env.GENERATOR_IMAGE }}
+          GENERATOR_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.GENERATOR_IMAGE }} | cut -d'@' -f2)
+          echo "digest=${GENERATOR_DIGEST}" >> $GITHUB_OUTPUT
+          echo "Generator image digest: ${GENERATOR_DIGEST}"
 
       - name: Discover OpenAPI specs
         id: discover
@@ -48,20 +58,109 @@ jobs:
             exit 0
           fi
           
-          # Write specs to a JSON file for later steps
-          printf '%s\n' "${SPECS[@]}" | jq -R . | jq -s '{"specs": .}' > specs.json
+          # Write specs to a JSON file with additional metadata (hash and version)
+          echo '{"specs": [' > specs.json
+          first=true
+          for spec in "${SPECS[@]}"; do
+            # Compute hash of spec file
+            spec_hash=$(sha256sum "$spec" | cut -d' ' -f1)
+            
+            # Extract API version from spec (supports both YAML and JSON)
+            if [[ "$spec" == *.json ]]; then
+              api_version=$(jq -r '.info.version // empty' "$spec" 2>/dev/null || echo "")
+            else
+              api_version=$(yq '.info.version // ""' "$spec" 2>/dev/null || echo "")
+            fi
+            
+            # Default to empty string if not found
+            api_version=${api_version:-""}
+            
+            if [ "$first" = true ]; then
+              first=false
+            else
+              echo "," >> specs.json
+            fi
+            
+            echo "{\"path\": \"$spec\", \"hash\": \"$spec_hash\", \"api_version\": \"$api_version\"}" >> specs.json
+            echo "  Spec: $spec, Hash: $spec_hash, Version: $api_version"
+          done
+          echo ']}'  >> specs.json
+          
           cat specs.json
           echo "specs_found=true" >> $GITHUB_OUTPUT
 
-      - name: Generate Clojure clients
+      - name: Restore cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/generation-hashes.json
+          key: clojure-clients-${{ steps.generator-version.outputs.digest }}
+          restore-keys: |
+            clojure-clients-
+
+      - name: Check for changes and filter specs
+        id: check-changes
         if: steps.discover.outputs.specs_found == 'true'
+        run: |
+          mkdir -p .cache
+          
+          # Load previous hashes if they exist
+          if [ -f ".cache/generation-hashes.json" ]; then
+            echo "Previous generation hashes found"
+            cat .cache/generation-hashes.json
+          else
+            echo "{}" > .cache/generation-hashes.json
+          fi
+          
+          GENERATOR_DIGEST="${{ steps.generator-version.outputs.digest }}"
+          
+          # Filter specs that need regeneration
+          jq --arg gen_digest "$GENERATOR_DIGEST" '
+            .specs as $specs |
+            (input // {}) as $cache |
+            {
+              "specs": [
+                $specs[] |
+                . as $spec |
+                $cache[$spec.path] as $cached |
+                if ($cached != null and $cached.spec_hash == $spec.hash and $cached.generator_digest == $gen_digest) then
+                  empty
+                else
+                  $spec
+                end
+              ],
+              "all_specs": $specs
+            }
+          ' specs.json .cache/generation-hashes.json > filtered_specs.json
+          
+          # Check if there are any specs to process
+          specs_to_process=$(jq '.specs | length' filtered_specs.json)
+          total_specs=$(jq '.all_specs | length' filtered_specs.json)
+          
+          echo "Specs to process: $specs_to_process out of $total_specs"
+          
+          if [ "$specs_to_process" -eq 0 ]; then
+            echo "All specs are up-to-date, skipping generation"
+            echo "needs_generation=false" >> $GITHUB_OUTPUT
+          else
+            echo "needs_generation=true" >> $GITHUB_OUTPUT
+            echo "Specs requiring generation:"
+            jq -r '.specs[].path' filtered_specs.json
+          fi
+
+      - name: Generate Clojure clients
+        if: steps.discover.outputs.specs_found == 'true' && steps.check-changes.outputs.needs_generation == 'true'
         run: |
           chmod +x .github/scripts/generate_single.sh
           
           mkdir -p generated_clients
           
-          # Read specs from JSON and generate clients
-          jq -r '.specs[]' specs.json | while read -r spec_path; do
+          # Read filtered specs from JSON and generate clients
+          jq -c '.specs[]' filtered_specs.json | while read -r spec_obj; do
+            spec_path=$(echo "$spec_obj" | jq -r '.path')
+            api_version=$(echo "$spec_obj" | jq -r '.api_version')
+            spec_hash=$(echo "$spec_obj" | jq -r '.hash')
+            
             # Extract spec name from path
             spec_file=$(basename "$spec_path")
             spec_name="${spec_file%.*}"
@@ -83,15 +182,15 @@ jobs:
             client_name="clj-${spec_name}-client"
             output_dir="generated_clients/${client_name}"
             
-            echo "Generating client: $client_name from $spec_path"
+            echo "Generating client: $client_name from $spec_path (API version: $api_version)"
             
             .github/scripts/generate_single.sh "$spec_path" "$output_dir" || {
               echo "Warning: Failed to generate client for $spec_path"
               continue
             }
             
-            # Record successful generation
-            echo "{\"spec_path\": \"$spec_path\", \"spec_name\": \"$spec_name\", \"client_name\": \"$client_name\", \"output_dir\": \"$output_dir\"}" >> generated_list.jsonl
+            # Record successful generation with version info
+            echo "{\"spec_path\": \"$spec_path\", \"spec_name\": \"$spec_name\", \"client_name\": \"$client_name\", \"output_dir\": \"$output_dir\", \"api_version\": \"$api_version\", \"spec_hash\": \"$spec_hash\"}" >> generated_list.jsonl
           done
           
           # Convert to proper JSON array
@@ -103,7 +202,7 @@ jobs:
           fi
 
       - name: Create target repositories and push clients
-        if: steps.discover.outputs.specs_found == 'true'
+        if: steps.discover.outputs.specs_found == 'true' && steps.check-changes.outputs.needs_generation == 'true'
         uses: actions/github-script@v7
         env:
           PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
@@ -139,6 +238,19 @@ jobs:
             // Helper function to validate path-like strings
             function isValidPath(str) {
               return /^[a-zA-Z0-9_./-]+$/.test(str);
+            }
+            
+            // Helper function to validate and sanitize git tag
+            function sanitizeTag(version) {
+              if (!version || version === 'null' || version === '') return null;
+              // Remove any characters that are not valid in git tags
+              // Git tags can contain alphanumeric, dots, hyphens, underscores
+              let tag = version.replace(/[^a-zA-Z0-9._-]/g, '-').replace(/--+/g, '-').replace(/^-|-$/g, '');
+              // Prepend 'v' if the tag starts with a number
+              if (tag && /^[0-9]/.test(tag)) {
+                tag = 'v' + tag;
+              }
+              return tag || null;
             }
             
             for (const client of pushMap) {
@@ -191,13 +303,15 @@ jobs:
                 // Push to repository using git credential helper
                 const outputDir = client.output_dir;
                 const repoUrlNoToken = `https://github.com/${targetOwner}/${repoName}.git`;
+                const apiVersion = client.api_version;
+                const gitTag = sanitizeTag(apiVersion);
                 
                 // Sanitize commit message
                 const commitMessage = `Auto-generated Clojure client from ${client.spec_path}`.replace(/["`$\\]/g, '');
                 
                 try {
-                  // Use environment variable for token instead of embedding in URL
-                  execSync(`
+                  // Build git commands - always push to main
+                  let gitCommands = `
                     cd ${shellEscape(outputDir)} && \
                     git init && \
                     git config user.email "github-actions[bot]@users.noreply.github.com" && \
@@ -207,17 +321,29 @@ jobs:
                     git commit -m ${shellEscape(commitMessage)} --allow-empty && \
                     git branch -M main && \
                     git remote add origin ${shellEscape(repoUrlNoToken)} && \
-                    GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin main
-                  `, { 
+                    GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin main`;
+                  
+                  // Add tag creation and push if we have a valid version
+                  if (gitTag) {
+                    console.log(`Creating tag: ${gitTag} for API version: ${apiVersion}`);
+                    gitCommands += ` && \
+                    git tag -f ${shellEscape(gitTag)} && \
+                    GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin ${shellEscape(gitTag)}`;
+                  }
+                  
+                  // Use environment variable for token instead of embedding in URL
+                  execSync(gitCommands, { 
                     stdio: 'pipe',
                     env: { ...process.env, GIT_TOKEN: token }
                   });
-                  console.log(`Pushed to: ${targetOwner}/${repoName}`);
+                  console.log(`Pushed to: ${targetOwner}/${repoName}` + (gitTag ? ` with tag ${gitTag}` : ''));
                   
                   results.push({
                     source_repo: context.repo.owner + '/' + context.repo.repo,
                     spec_path: client.spec_path,
                     client_repo: `https://github.com/${targetOwner}/${repoName}`,
+                    api_version: apiVersion || null,
+                    git_tag: gitTag || null,
                     updated_at: new Date().toISOString()
                   });
                 } catch (pushError) {
@@ -233,7 +359,7 @@ jobs:
             console.log('Client results:', results);
 
       - name: Update meta repository
-        if: steps.discover.outputs.specs_found == 'true'
+        if: steps.discover.outputs.specs_found == 'true' && steps.check-changes.outputs.needs_generation == 'true'
         uses: actions/github-script@v7
         env:
           PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
@@ -334,3 +460,42 @@ jobs:
             } catch (error) {
               console.error(`Failed to update meta repo: ${error.message}`);
             }
+
+      - name: Update cache hashes
+        if: steps.discover.outputs.specs_found == 'true' && steps.check-changes.outputs.needs_generation == 'true'
+        run: |
+          GENERATOR_DIGEST="${{ steps.generator-version.outputs.digest }}"
+          
+          # Read all specs and update the cache with successfully generated ones
+          # Start with existing cache
+          if [ -f ".cache/generation-hashes.json" ]; then
+            cp .cache/generation-hashes.json .cache/generation-hashes-new.json
+          else
+            echo "{}" > .cache/generation-hashes-new.json
+          fi
+          
+          # Read the push_map.json which contains successfully generated clients
+          if [ -f "push_map.json" ]; then
+            jq --arg gen_digest "$GENERATOR_DIGEST" '
+              reduce .[] as $item (
+                (input);
+                .[$item.spec_path] = {
+                  "spec_hash": $item.spec_hash,
+                  "generator_digest": $gen_digest,
+                  "api_version": $item.api_version,
+                  "generated_at": (now | strftime("%Y-%m-%dT%H:%M:%SZ"))
+                }
+              )
+            ' push_map.json .cache/generation-hashes-new.json > .cache/generation-hashes-updated.json
+            mv .cache/generation-hashes-updated.json .cache/generation-hashes.json
+          fi
+          
+          echo "Updated cache hashes:"
+          cat .cache/generation-hashes.json
+
+      - name: Save cache
+        if: steps.discover.outputs.specs_found == 'true' && steps.check-changes.outputs.needs_generation == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/generation-hashes.json
+          key: clojure-clients-${{ steps.generator-version.outputs.digest }}-${{ github.run_id }}

@@ -7,10 +7,12 @@ This repository includes a GitHub Actions workflow that automatically generates 
 The workflow:
 
 1. **Discovers** all OpenAPI specification files (`.yaml`, `.yml`, `.json`) in the repository by checking for `openapi` or `swagger` keywords
-2. **Generates** Clojure clients using the official `openapitools/openapi-generator-cli:latest` Docker image
-3. **Creates** target repositories named `clj-<spec-name>-client` under the specified owner
-4. **Pushes** the generated code to each client repository
-5. **Updates** a meta repository with a `clients.json` file tracking all generated clients
+2. **Caches** generation results - skips regeneration when neither the code generator version nor the OpenAPI spec has changed
+3. **Generates** Clojure clients using the official `openapitools/openapi-generator-cli:latest` Docker image
+4. **Creates** target repositories named `clj-<spec-name>-client` under the specified owner (private by default)
+5. **Tags** each client repository with the API version from the spec (if `info.version` is specified)
+6. **Pushes** the generated code to each client repository
+7. **Updates** a meta repository with a `clients.json` file tracking all generated clients
 
 ## Setup
 
@@ -36,7 +38,7 @@ Configure these as repository variables (Settings → Secrets and variables → 
 |----------|---------|-------------|
 | `TARGET_OWNER` | `Schmoho` | GitHub username or organization where client repos will be created |
 | `META_REPO` | `openbioapi-clients-meta` | Name of the meta repository that tracks all generated clients |
-| `PRIVATE_CLIENTS` | `false` | Set to `true` to create private client repositories |
+| `PRIVATE_CLIENTS` | `true` | Set to `false` to create public client repositories |
 
 ## Workflow Triggers
 
@@ -45,6 +47,29 @@ The workflow runs:
 - **On push** to the `main` branch
 - **On schedule** daily at midnight UTC
 - **Manually** via workflow dispatch (Actions → Generate Clojure Clients → Run workflow)
+
+## Caching
+
+The workflow implements smart caching to avoid unnecessary regeneration:
+
+- **Spec file hashing**: Each OpenAPI spec file is hashed (SHA-256)
+- **Generator version tracking**: The Docker image digest of `openapitools/openapi-generator-cli:latest` is tracked
+- **Skip conditions**: Generation is skipped when both the spec hash and generator version match the cached values
+
+This means:
+- If only the spec changes, only that client is regenerated
+- If the generator version changes, all clients are regenerated
+- Unchanged specs with the same generator version are skipped
+
+## API Version Tagging
+
+If your OpenAPI spec includes a version in the `info.version` field, the workflow will:
+
+1. Extract the version (e.g., `1.0.0`, `v2`, `v0`)
+2. Create a git tag in the client repository (prefixed with `v` if needed, e.g., `v1.0.0`)
+3. Push the tag to the remote repository
+
+This allows consumers to pin to specific API versions using git tags.
 
 ## Generated Repository Naming
 
@@ -86,6 +111,8 @@ The workflow creates/updates a meta repository containing a `clients.json` file 
       "source_repo": "Schmoho/openbioapi",
       "spec_path": "./go.yml",
       "client_repo": "https://github.com/Schmoho/clj-go-client",
+      "api_version": "1.0.0",
+      "git_tag": "v1.0.0",
       "updated_at": "2024-01-01T00:00:00.000Z"
     }
   ]
@@ -109,6 +136,10 @@ The workflow creates/updates a meta repository containing a `clients.json` file 
 
 4. **Docker errors**
    - Ensure the workflow runner has Docker available (ubuntu-latest includes Docker)
+
+5. **"All specs are up-to-date, skipping generation"**
+   - This is expected when no specs or the generator have changed
+   - To force regeneration, clear the GitHub Actions cache or make a change to your spec files
 
 ## Local Development
 
