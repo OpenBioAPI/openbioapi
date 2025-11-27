@@ -112,6 +112,7 @@ jobs:
             const fs = require('fs');
             const { execSync } = require('child_process');
             const path = require('path');
+            const { Octokit } = require('@octokit/rest');
             
             const pushMap = JSON.parse(fs.readFileSync('push_map.json', 'utf8'));
             
@@ -129,7 +130,7 @@ jobs:
               return;
             }
             
-            const octokitClient = getOctokit(token);
+            const octokitClient = new Octokit({ auth: token });
             
             const results = [];
             
@@ -242,6 +243,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            const { Octokit } = require('@octokit/rest');
             
             const token = process.env.PERSONAL_TOKEN;
             if (!token) {
@@ -263,7 +265,7 @@ jobs:
             const targetOwner = process.env.TARGET_OWNER;
             const metaRepo = process.env.META_REPO;
             
-            const octokitClient = getOctokit(token);
+            const octokitClient = new Octokit({ auth: token });
             
             // Try to ensure meta repo exists
             try {
