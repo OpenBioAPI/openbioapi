@@ -26,12 +26,19 @@ fi
 SPEC_PATH="$1"
 OUTPUT_DIR="$2"
 
+# Validate that spec file exists
+if [ ! -f "$SPEC_PATH" ]; then
+  echo "Error: Spec file not found: $SPEC_PATH"
+  exit 1
+fi
+
 # Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
 
 # Get absolute paths for Docker volume mounting
-SPEC_ABS_PATH=$(realpath "$SPEC_PATH")
-OUTPUT_ABS_PATH=$(realpath "$OUTPUT_DIR")
+# Use readlink -f as a portable alternative to realpath
+SPEC_ABS_PATH=$(readlink -f "$SPEC_PATH")
+OUTPUT_ABS_PATH=$(readlink -f "$OUTPUT_DIR")
 SPEC_DIR=$(dirname "$SPEC_ABS_PATH")
 SPEC_FILE=$(basename "$SPEC_ABS_PATH")
 

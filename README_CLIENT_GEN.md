@@ -57,7 +57,8 @@ clj-<spec-name>-client
 Where `<spec-name>` is derived from the spec file:
 - `go.yml` → `clj-go-client`
 - `ncbi.yaml` → `clj-ncbi-client`
-- `uniprot/uniprot.json` → `clj-uniprot-uniprot-client`
+- `uniprot/uniprot.json` → `clj-uniprot-client` (avoids redundant naming)
+- `uniprot/citations.json` → `clj-uniprot-citations-client`
 
 ## Helper Script
 

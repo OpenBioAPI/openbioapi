@@ -66,10 +66,15 @@ jobs:
             spec_file=$(basename "$spec_path")
             spec_name="${spec_file%.*}"
             
-            # Handle nested paths (e.g., uniprot/uniprot.json -> uniprot-uniprot)
+            # Handle nested paths (e.g., uniprot/uniprot.json)
             dir_name=$(dirname "$spec_path" | sed 's|^\./||' | tr '/' '-')
             if [ "$dir_name" != "." ]; then
-              spec_name="${dir_name}-${spec_name}"
+              # Avoid redundant names like 'uniprot-uniprot' when filename matches directory
+              if [ "$spec_name" != "$dir_name" ]; then
+                spec_name="${dir_name}-${spec_name}"
+              else
+                spec_name="$dir_name"
+              fi
             fi
             
             # Sanitize spec name (lowercase, replace special chars with dash)
@@ -106,6 +111,7 @@ jobs:
           script: |
             const fs = require('fs');
             const { execSync } = require('child_process');
+            const path = require('path');
             
             const pushMap = JSON.parse(fs.readFileSync('push_map.json', 'utf8'));
             
@@ -127,9 +133,25 @@ jobs:
             
             const results = [];
             
+            // Helper function to sanitize shell arguments
+            function shellEscape(str) {
+              return "'" + str.replace(/'/g, "'\"'\"'") + "'";
+            }
+            
+            // Helper function to validate path-like strings
+            function isValidPath(str) {
+              return /^[a-zA-Z0-9_./-]+$/.test(str);
+            }
+            
             for (const client of pushMap) {
               const repoName = client.client_name;
               console.log(`Processing: ${repoName}`);
+              
+              // Validate inputs to prevent command injection
+              if (!isValidPath(client.output_dir) || !isValidPath(client.spec_path)) {
+                console.error(`Invalid path detected, skipping: ${repoName}`);
+                continue;
+              }
               
               // Try to create repository (it may already exist)
               try {
@@ -168,22 +190,30 @@ jobs:
                   }
                 }
                 
-                // Push to repository
-                const repoUrl = `https://${token}@github.com/${targetOwner}/${repoName}.git`;
+                // Push to repository using git credential helper
                 const outputDir = client.output_dir;
+                const repoUrlNoToken = `https://github.com/${targetOwner}/${repoName}.git`;
+                
+                // Sanitize commit message
+                const commitMessage = `Auto-generated Clojure client from ${client.spec_path}`.replace(/["`$\\]/g, '');
                 
                 try {
+                  // Use environment variable for token instead of embedding in URL
                   execSync(`
-                    cd "${outputDir}" && \
+                    cd ${shellEscape(outputDir)} && \
                     git init && \
                     git config user.email "github-actions[bot]@users.noreply.github.com" && \
                     git config user.name "github-actions[bot]" && \
+                    git config credential.helper '!f() { echo "password=$GIT_TOKEN"; }; f' && \
                     git add -A && \
-                    git commit -m "Auto-generated Clojure client from ${client.spec_path}" --allow-empty && \
+                    git commit -m ${shellEscape(commitMessage)} --allow-empty && \
                     git branch -M main && \
-                    git remote add origin "${repoUrl}" && \
-                    git push -f origin main
-                  `, { stdio: 'pipe' });
+                    git remote add origin ${shellEscape(repoUrlNoToken)} && \
+                    GIT_ASKPASS=echo git -c credential.username=x-access-token push -f origin main
+                  `, { 
+                    stdio: 'pipe',
+                    env: { ...process.env, GIT_TOKEN: token }
+                  });
                   console.log(`Pushed to: ${targetOwner}/${repoName}`);
                   
                   results.push({
