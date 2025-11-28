@@ -1,0 +1,489 @@
+openapi: 3.1.0
+info:
+  title: CellML Model Repository API
+  description: |
+    The CellML Model Repository provides a web service API for accessing 
+    CellML models stored in the repository. This API allows programmatic 
+    access to workspaces, exposures, and files within the repository.
+
+    The repository uses the Auckland Physiome Repository software (PMR2).
+    
+    __Documentation:__ https://aucklandphysiomerepository.readthedocs.io/en/latest/webservice.html
+  contact:
+    name: CellML
+    url: https://models.cellml.org
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: https://models.cellml.org
+paths:
+  /search:
+    get:
+      summary: Search the repository
+      description: |
+        Search for workspaces, exposures, and files in the repository.
+        Supports full-text search across all indexed content.
+      operationId: searchRepository
+      parameters:
+        - name: SearchableText
+          in: query
+          description: The search query text
+          required: false
+          schema:
+            type: string
+          example: cardiac
+        - name: portal_type
+          in: query
+          description: Filter by content type
+          required: false
+          schema:
+            type: string
+            enum:
+              - Workspace
+              - Exposure
+              - ExposureFile
+        - name: Subject
+          in: query
+          description: Filter by subject category
+          required: false
+          schema:
+            type: string
+        - name: b_start
+          in: query
+          description: Starting index for pagination
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: b_size
+          in: query
+          description: Number of results per page
+          required: false
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: Search results
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+                  total:
+                    type: integer
+                    description: Total number of matching results
+  /workspace:
+    get:
+      summary: List all workspaces
+      description: Retrieve a list of all workspaces in the repository
+      operationId: listWorkspaces
+      responses:
+        '200':
+          description: List of workspaces
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceSummary'
+  /workspace/{workspace_id}:
+    get:
+      summary: Get workspace details
+      description: Retrieve detailed information about a specific workspace
+      operationId: getWorkspace
+      parameters:
+        - name: workspace_id
+          in: path
+          required: true
+          description: The unique identifier of the workspace
+          schema:
+            type: string
+          example: hodgkin_huxley_1952
+      responses:
+        '200':
+          description: Workspace details
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '404':
+          description: Workspace not found
+  /workspace/{workspace_id}/file/{commit_id}/{filepath}:
+    get:
+      summary: Get file from workspace
+      description: Retrieve a specific file from a workspace at a given commit
+      operationId: getWorkspaceFile
+      parameters:
+        - name: workspace_id
+          in: path
+          required: true
+          description: The unique identifier of the workspace
+          schema:
+            type: string
+        - name: commit_id
+          in: path
+          required: true
+          description: The commit identifier (can be a revision hash or branch name)
+          schema:
+            type: string
+        - name: filepath
+          in: path
+          required: true
+          description: Path to the file within the workspace
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File content
+          content:
+            '*/*':
+              schema:
+                type: string
+        '404':
+          description: File not found
+  /workspace/{workspace_id}/rawfile/{commit_id}/{filepath}:
+    get:
+      summary: Get raw file content
+      description: Retrieve the raw content of a file without any processing
+      operationId: getWorkspaceRawFile
+      parameters:
+        - name: workspace_id
+          in: path
+          required: true
+          description: The unique identifier of the workspace
+          schema:
+            type: string
+        - name: commit_id
+          in: path
+          required: true
+          description: The commit identifier
+          schema:
+            type: string
+        - name: filepath
+          in: path
+          required: true
+          description: Path to the file within the workspace
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Raw file content
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: File not found
+  /exposure:
+    get:
+      summary: List all exposures
+      description: Retrieve a list of all exposures (published models) in the repository
+      operationId: listExposures
+      responses:
+        '200':
+          description: List of exposures
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExposureSummary'
+  /exposure/{exposure_id}:
+    get:
+      summary: Get exposure details
+      description: Retrieve detailed information about a specific exposure
+      operationId: getExposure
+      parameters:
+        - name: exposure_id
+          in: path
+          required: true
+          description: The unique identifier of the exposure
+          schema:
+            type: string
+          example: hodgkin_huxley_1952
+      responses:
+        '200':
+          description: Exposure details
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exposure'
+        '404':
+          description: Exposure not found
+  /exposure/{exposure_id}/{file_path}:
+    get:
+      summary: Get exposure file
+      description: Retrieve a specific file from an exposure
+      operationId: getExposureFile
+      parameters:
+        - name: exposure_id
+          in: path
+          required: true
+          description: The unique identifier of the exposure
+          schema:
+            type: string
+        - name: file_path
+          in: path
+          required: true
+          description: Path to the file within the exposure
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Exposure file details or content
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureFile'
+            application/cellml+xml:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '404':
+          description: File not found
+  /cellml:
+    get:
+      summary: CellML repository main page
+      description: Get the main CellML page and repository information
+      operationId: getCellmlMain
+      responses:
+        '200':
+          description: CellML main page content
+          content:
+            text/html:
+              schema:
+                type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryInfo'
+components:
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the item
+        title:
+          type: string
+          description: Title of the item
+        description:
+          type: string
+          description: Description of the item
+        portal_type:
+          type: string
+          description: Type of content (Workspace, Exposure, ExposureFile)
+        url:
+          type: string
+          format: uri
+          description: URL to the item
+    WorkspaceSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the workspace
+        title:
+          type: string
+          description: Title of the workspace
+        description:
+          type: string
+          description: Description of the workspace
+        url:
+          type: string
+          format: uri
+          description: URL to the workspace
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the workspace
+        title:
+          type: string
+          description: Title of the workspace
+        description:
+          type: string
+          description: Description of the workspace
+        storage:
+          type: string
+          description: Storage type (e.g., git, mercurial)
+        owner:
+          type: string
+          description: Owner of the workspace
+        created:
+          type: string
+          format: date-time
+          description: Creation date
+        modified:
+          type: string
+          format: date-time
+          description: Last modification date
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileInfo'
+          description: List of files in the workspace
+    FileInfo:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Path to the file
+        size:
+          type: integer
+          description: Size of the file in bytes
+        mimetype:
+          type: string
+          description: MIME type of the file
+    ExposureSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the exposure
+        title:
+          type: string
+          description: Title of the exposure
+        description:
+          type: string
+          description: Description of the exposure
+        url:
+          type: string
+          format: uri
+          description: URL to the exposure
+        workspace:
+          type: string
+          description: Associated workspace identifier
+    Exposure:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the exposure
+        title:
+          type: string
+          description: Title of the exposure
+        description:
+          type: string
+          description: Description of the exposure
+        workspace:
+          type: string
+          description: Associated workspace identifier
+        commit_id:
+          type: string
+          description: Commit ID that this exposure is based on
+        created:
+          type: string
+          format: date-time
+          description: Creation date
+        modified:
+          type: string
+          format: date-time
+          description: Last modification date
+        curation:
+          type: object
+          properties:
+            flags:
+              type: array
+              items:
+                type: string
+              description: Curation flags
+            stars:
+              type: integer
+              description: Curation star rating
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposureFileSummary'
+          description: List of files in the exposure
+    ExposureFileSummary:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Path to the file
+        title:
+          type: string
+          description: Title of the file
+        views:
+          type: array
+          items:
+            type: string
+          description: Available views for this file
+    ExposureFile:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the exposure file
+        title:
+          type: string
+          description: Title of the file
+        path:
+          type: string
+          description: Path to the file
+        views:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposureFileView'
+          description: Available views for this file
+        documentation:
+          type: string
+          description: Documentation content (if available)
+    ExposureFileView:
+      type: object
+      properties:
+        id:
+          type: string
+          description: View identifier
+        label:
+          type: string
+          description: Human-readable label for the view
+        url:
+          type: string
+          format: uri
+          description: URL to access this view
+    RepositoryInfo:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Repository title
+        description:
+          type: string
+          description: Repository description
+        workspace_count:
+          type: integer
+          description: Number of workspaces
+        exposure_count:
+          type: integer
+          description: Number of exposures
