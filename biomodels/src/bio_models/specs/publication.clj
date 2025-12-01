@@ -19,7 +19,7 @@
    (ds/opt :issue) string?
    (ds/opt :pages) string?
    (ds/opt :link) string?
-   (ds/opt :authors) publication-author-spec
+   (ds/opt :authors) (s/coll-of publication-author-spec)
    })
 
 (def publication-spec

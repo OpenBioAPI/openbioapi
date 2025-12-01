@@ -902,7 +902,10 @@
                         "description": "The publication link where we can access and read it"
                     },
                     "authors": {
-                        "$ref": "#/components/schemas/PublicationAuthor",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublicationAuthor"
+                        },
                         "description": "The list of the publication authors"
                     }
                 },
@@ -919,7 +922,10 @@
                         "description": "The number of the models matching with the search term"
                     },
                     "models": {
-                        "$ref": "#/components/schemas/ModelSummary",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ModelSummary"
+                        },
                         "description": "The list of the models matching with the search term"
                     },
                     "queryParameters": {

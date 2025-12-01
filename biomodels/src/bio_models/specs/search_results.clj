@@ -10,7 +10,7 @@
 (def search-results-data
   {
    (ds/opt :matches) int?
-   (ds/opt :models) model-summary-spec
+   (ds/opt :models) (s/coll-of model-summary-spec)
    (ds/opt :queryParameters) query-parameters-spec
    })
 
