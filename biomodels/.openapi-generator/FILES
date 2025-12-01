@@ -8,3 +8,15 @@ src/bio_models/api/path_models_operations.clj
 src/bio_models/api/pdgsmm_operations.clj
 src/bio_models/api/search_models.clj
 src/bio_models/core.clj
+src/bio_models/specs/format.clj
+src/bio_models/specs/history.clj
+src/bio_models/specs/model.clj
+src/bio_models/specs/model_file.clj
+src/bio_models/specs/model_files.clj
+src/bio_models/specs/model_identifiers.clj
+src/bio_models/specs/model_summary.clj
+src/bio_models/specs/publication.clj
+src/bio_models/specs/publication_author.clj
+src/bio_models/specs/query_parameters.clj
+src/bio_models/specs/revision.clj
+src/bio_models/specs/search_results.clj

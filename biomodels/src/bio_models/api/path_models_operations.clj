@@ -3,81 +3,94 @@
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
             [orchestra.core :refer [defn-spec]]
+            [bio-models.specs.model-identifiers :refer :all]
+            [bio-models.specs.model-file :refer :all]
+            [bio-models.specs.publication :refer :all]
+            [bio-models.specs.model-files :refer :all]
+            [bio-models.specs.format :refer :all]
+            [bio-models.specs.model-summary :refer :all]
+            [bio-models.specs.query-parameters :refer :all]
+            [bio-models.specs.model :refer :all]
+            [bio-models.specs.history :refer :all]
+            [bio-models.specs.search-results :refer :all]
+            [bio-models.specs.publication-author :refer :all]
+            [bio-models.specs.revision :refer :all]
             )
   (:import (java.io File)))
 
 
-(defn-spec p2m-missing-get-with-http-info any?
+(defn-spec get-p2-m-missing-with-http-info any?
   "Retrieve the identifiers of all Path2Models entries that are no longer directly accessible
   Retrieve all models in Path2Models that are now only available indirectly, through the representative model for the corresponding genus"
-  [UNKNOWN_PARAMETER_NAME ]
-  (check-required-params UNKNOWN_PARAMETER_NAME)
-  (call-api "/p2m/missing" :get
-            {:path-params   {"format" UNKNOWN_PARAMETER_NAME }
-             :header-params {}
-             :query-params  {}
-             :form-params   {}
-             :content-types []
-             :accepts       []
-             :auth-names    []}))
-
-(defn-spec p2m-missing-get any?
-  "Retrieve the identifiers of all Path2Models entries that are no longer directly accessible
-  Retrieve all models in Path2Models that are now only available indirectly, through the representative model for the corresponding genus"
-  [UNKNOWN_PARAMETER_NAME ]
-  (let [res (:data (p2m-missing-get-with-http-info UNKNOWN_PARAMETER_NAME))]
-    (if (:decode-models *api-context*)
-       (st/decode any? res st/string-transformer)
-       res)))
-
-
-(defn-spec p2m-representative-get-with-http-info any?
-  "Retrieve a representative model in Path2Models
-  Get the representative model identifier for a given missing model in Path2Models. This endpoint accepts as parameters a mandatory model identifier and an optional response format"
-  ([UNKNOWN_PARAMETER_NAME , ] (p2m-representative-get-with-http-info UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , {:keys [UNKNOWN_PARAMETER_NAME2]} (s/map-of keyword? any?)]
-   (check-required-params UNKNOWN_PARAMETER_NAME)
-   (call-api "/p2m/representative" :get
+  ([] (get-p2-m-missing-with-http-info nil))
+  ([{:keys [format]} (s/map-of keyword? any?)]
+   (call-api "/p2m/missing" :get
              {:path-params   {}
               :header-params {}
-              :query-params  {"model" UNKNOWN_PARAMETER_NAME "format" UNKNOWN_PARAMETER_NAME2 }
+              :query-params  {"format" format }
               :form-params   {}
               :content-types []
-              :accepts       []
+              :accepts       ["application/json" "application/xml" "text/html"]
               :auth-names    []})))
 
-(defn-spec p2m-representative-get any?
-  "Retrieve a representative model in Path2Models
-  Get the representative model identifier for a given missing model in Path2Models. This endpoint accepts as parameters a mandatory model identifier and an optional response format"
-  ([UNKNOWN_PARAMETER_NAME , ] (p2m-representative-get UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , optional-params any?]
-   (let [res (:data (p2m-representative-get-with-http-info UNKNOWN_PARAMETER_NAME optional-params))]
+(defn-spec get-p2-m-missing any?
+  "Retrieve the identifiers of all Path2Models entries that are no longer directly accessible
+  Retrieve all models in Path2Models that are now only available indirectly, through the representative model for the corresponding genus"
+  ([] (get-p2-m-missing nil))
+  ([optional-params any?]
+   (let [res (:data (get-p2-m-missing-with-http-info optional-params))]
      (if (:decode-models *api-context*)
         (st/decode any? res st/string-transformer)
         res))))
 
 
-(defn-spec p2m-representatives-get-with-http-info any?
+(defn-spec get-p2-m-representative-with-http-info any?
+  "Retrieve a representative model in Path2Models
+  Get the representative model identifier for a given missing model in Path2Models. This endpoint accepts as parameters a mandatory model identifier and an optional response format"
+  ([model string?, ] (get-p2-m-representative-with-http-info model nil))
+  ([model string?, {:keys [format]} (s/map-of keyword? any?)]
+   (check-required-params model)
+   (call-api "/p2m/representative" :get
+             {:path-params   {}
+              :header-params {}
+              :query-params  {"model" model "format" format }
+              :form-params   {}
+              :content-types []
+              :accepts       ["application/json" "application/xml" "text/html"]
+              :auth-names    []})))
+
+(defn-spec get-p2-m-representative any?
+  "Retrieve a representative model in Path2Models
+  Get the representative model identifier for a given missing model in Path2Models. This endpoint accepts as parameters a mandatory model identifier and an optional response format"
+  ([model string?, ] (get-p2-m-representative model nil))
+  ([model string?, optional-params any?]
+   (let [res (:data (get-p2-m-representative-with-http-info model optional-params))]
+     (if (:decode-models *api-context*)
+        (st/decode any? res st/string-transformer)
+        res))))
+
+
+(defn-spec get-p2-m-representatives-with-http-info any?
   "Find the replacement accessions for a set of Path2Models entries
   Get the representative model identifiers of a set of given missing models in Path2Models. This end point expects a comma-separated list of model identifiers (without any surrounding whitespace) and an optional response format. Examples: BMID000000112902,BMID000000009880,BMID000000027397"
-  ([UNKNOWN_PARAMETER_NAME , ] (p2m-representatives-get-with-http-info UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , {:keys [UNKNOWN_PARAMETER_NAME2]} (s/map-of keyword? any?)]
-   (check-required-params UNKNOWN_PARAMETER_NAME)
+  ([modelIds (s/coll-of string?), ] (get-p2-m-representatives-with-http-info modelIds nil))
+  ([modelIds (s/coll-of string?), {:keys [format]} (s/map-of keyword? any?)]
+   (check-required-params modelIds)
    (call-api "/p2m/representatives" :get
              {:path-params   {}
               :header-params {}
-              :query-params  {"modelIds" UNKNOWN_PARAMETER_NAME "format" UNKNOWN_PARAMETER_NAME2 }
+              :query-params  {"modelIds" (with-collection-format modelIds :csv) "format" format }
               :form-params   {}
               :content-types []
-              :accepts       []
+              :accepts       ["application/json" "application/xml" "text/html"]
               :auth-names    []})))
 
-(defn-spec p2m-representatives-get any?
+(defn-spec get-p2-m-representatives any?
   "Find the replacement accessions for a set of Path2Models entries
   Get the representative model identifiers of a set of given missing models in Path2Models. This end point expects a comma-separated list of model identifiers (without any surrounding whitespace) and an optional response format. Examples: BMID000000112902,BMID000000009880,BMID000000027397"
-  ([UNKNOWN_PARAMETER_NAME , ] (p2m-representatives-get UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , optional-params any?]
-   (let [res (:data (p2m-representatives-get-with-http-info UNKNOWN_PARAMETER_NAME optional-params))]
+  ([modelIds (s/coll-of string?), ] (get-p2-m-representatives modelIds nil))
+  ([modelIds (s/coll-of string?), optional-params any?]
+   (let [res (:data (get-p2-m-representatives-with-http-info modelIds optional-params))]
      (if (:decode-models *api-context*)
         (st/decode any? res st/string-transformer)
         res))))
