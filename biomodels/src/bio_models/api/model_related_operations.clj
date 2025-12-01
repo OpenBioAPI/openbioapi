@@ -3,104 +3,116 @@
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
             [orchestra.core :refer [defn-spec]]
+            [bio-models.specs.model-identifiers :refer :all]
+            [bio-models.specs.model-file :refer :all]
+            [bio-models.specs.publication :refer :all]
+            [bio-models.specs.model-files :refer :all]
+            [bio-models.specs.format :refer :all]
+            [bio-models.specs.model-summary :refer :all]
+            [bio-models.specs.query-parameters :refer :all]
+            [bio-models.specs.model :refer :all]
+            [bio-models.specs.history :refer :all]
+            [bio-models.specs.search-results :refer :all]
+            [bio-models.specs.publication-author :refer :all]
+            [bio-models.specs.revision :refer :all]
             )
   (:import (java.io File)))
 
 
-(defn-spec model-download-model-id-get-with-http-info any?
+(defn-spec get-model-download-modelid-with-http-info any?
   "Download a particular file associated with a given model or all its files as a COMBINE archive. The Content disposition and MIME type response headers contain the file name and type."
-  ([UNKNOWN_PARAMETER_NAME , ] (model-download-model-id-get-with-http-info UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , {:keys [UNKNOWN_PARAMETER_NAME2]} (s/map-of keyword? any?)]
-   (check-required-params UNKNOWN_PARAMETER_NAME)
+  ([modelId string?, ] (get-model-download-modelid-with-http-info modelId nil))
+  ([modelId string?, {:keys [filename]} (s/map-of keyword? any?)]
+   (check-required-params modelId)
    (call-api "/model/download/{modelId}" :get
-             {:path-params   {"modelId" UNKNOWN_PARAMETER_NAME }
+             {:path-params   {"modelId" modelId }
               :header-params {}
-              :query-params  {"filename" UNKNOWN_PARAMETER_NAME2 }
+              :query-params  {"filename" filename }
               :form-params   {}
               :content-types []
-              :accepts       []
+              :accepts       ["application/octet-stream"]
               :auth-names    []})))
 
-(defn-spec model-download-model-id-get any?
+(defn-spec get-model-download-modelid any?
   "Download a particular file associated with a given model or all its files as a COMBINE archive. The Content disposition and MIME type response headers contain the file name and type."
-  ([UNKNOWN_PARAMETER_NAME , ] (model-download-model-id-get UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , optional-params any?]
-   (let [res (:data (model-download-model-id-get-with-http-info UNKNOWN_PARAMETER_NAME optional-params))]
+  ([modelId string?, ] (get-model-download-modelid modelId nil))
+  ([modelId string?, optional-params any?]
+   (let [res (:data (get-model-download-modelid-with-http-info modelId optional-params))]
      (if (:decode-models *api-context*)
         (st/decode any? res st/string-transformer)
         res))))
 
 
-(defn-spec model-files-model-id-get-with-http-info any?
+(defn-spec get-model-files-modelid-with-http-info any?
   "Extract metadata information of model files of a particular model"
-  ([UNKNOWN_PARAMETER_NAME , ] (model-files-model-id-get-with-http-info UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , {:keys [UNKNOWN_PARAMETER_NAME2]} (s/map-of keyword? any?)]
-   (check-required-params UNKNOWN_PARAMETER_NAME)
+  ([modelId string?, ] (get-model-files-modelid-with-http-info modelId nil))
+  ([modelId string?, {:keys [format]} (s/map-of keyword? any?)]
+   (check-required-params modelId)
    (call-api "/model/files/{modelId}" :get
-             {:path-params   {"modelId" UNKNOWN_PARAMETER_NAME }
+             {:path-params   {"modelId" modelId }
               :header-params {}
-              :query-params  {"format" UNKNOWN_PARAMETER_NAME2 }
+              :query-params  {"format" format }
               :form-params   {}
               :content-types []
-              :accepts       []
+              :accepts       ["application/json" "application/xml"]
               :auth-names    []})))
 
-(defn-spec model-files-model-id-get any?
+(defn-spec get-model-files-modelid model-files-spec
   "Extract metadata information of model files of a particular model"
-  ([UNKNOWN_PARAMETER_NAME , ] (model-files-model-id-get UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , optional-params any?]
-   (let [res (:data (model-files-model-id-get-with-http-info UNKNOWN_PARAMETER_NAME optional-params))]
+  ([modelId string?, ] (get-model-files-modelid modelId nil))
+  ([modelId string?, optional-params any?]
+   (let [res (:data (get-model-files-modelid-with-http-info modelId optional-params))]
      (if (:decode-models *api-context*)
-        (st/decode any? res st/string-transformer)
+        (st/decode model-files-spec res st/string-transformer)
         res))))
 
 
-(defn-spec model-id-get-with-http-info any?
-  "Fetch information about a given model at a particular revision."
-  ([UNKNOWN_PARAMETER_NAME , ] (model-id-get-with-http-info UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , {:keys [UNKNOWN_PARAMETER_NAME2]} (s/map-of keyword? any?)]
-   (check-required-params UNKNOWN_PARAMETER_NAME)
-   (call-api "/{modelId}" :get
-             {:path-params   {"modelId" UNKNOWN_PARAMETER_NAME }
-              :header-params {}
-              :query-params  {"format" UNKNOWN_PARAMETER_NAME2 }
-              :form-params   {}
-              :content-types []
-              :accepts       []
-              :auth-names    []})))
-
-(defn-spec model-id-get any?
-  "Fetch information about a given model at a particular revision."
-  ([UNKNOWN_PARAMETER_NAME , ] (model-id-get UNKNOWN_PARAMETER_NAME nil))
-  ([UNKNOWN_PARAMETER_NAME , optional-params any?]
-   (let [res (:data (model-id-get-with-http-info UNKNOWN_PARAMETER_NAME optional-params))]
-     (if (:decode-models *api-context*)
-        (st/decode any? res st/string-transformer)
-        res))))
-
-
-(defn-spec model-identifiers-get-with-http-info any?
+(defn-spec get-model-identifiers-with-http-info any?
   "Fetch all model identifiers
   Fetch all publicly available model identifiers"
-  ([] (model-identifiers-get-with-http-info nil))
-  ([{:keys [UNKNOWN_PARAMETER_NAME]} (s/map-of keyword? any?)]
+  ([] (get-model-identifiers-with-http-info nil))
+  ([{:keys [format]} (s/map-of keyword? any?)]
    (call-api "/model/identifiers" :get
              {:path-params   {}
               :header-params {}
-              :query-params  {"format" UNKNOWN_PARAMETER_NAME }
+              :query-params  {"format" format }
               :form-params   {}
               :content-types []
-              :accepts       []
+              :accepts       ["application/json" "application/xml" "text/html"]
               :auth-names    []})))
 
-(defn-spec model-identifiers-get any?
+(defn-spec get-model-identifiers model-identifiers-spec
   "Fetch all model identifiers
   Fetch all publicly available model identifiers"
-  ([] (model-identifiers-get nil))
+  ([] (get-model-identifiers nil))
   ([optional-params any?]
-   (let [res (:data (model-identifiers-get-with-http-info optional-params))]
+   (let [res (:data (get-model-identifiers-with-http-info optional-params))]
      (if (:decode-models *api-context*)
-        (st/decode any? res st/string-transformer)
+        (st/decode model-identifiers-spec res st/string-transformer)
+        res))))
+
+
+(defn-spec get-modelid-with-http-info any?
+  "Fetch information about a given model at a particular revision."
+  ([modelId string?, ] (get-modelid-with-http-info modelId nil))
+  ([modelId string?, {:keys [format]} (s/map-of keyword? any?)]
+   (check-required-params modelId)
+   (call-api "/{modelId}" :get
+             {:path-params   {"modelId" modelId }
+              :header-params {}
+              :query-params  {"format" format }
+              :form-params   {}
+              :content-types []
+              :accepts       ["application/json" "application/xml" "text/html"]
+              :auth-names    []})))
+
+(defn-spec get-modelid model-spec
+  "Fetch information about a given model at a particular revision."
+  ([modelId string?, ] (get-modelid modelId nil))
+  ([modelId string?, optional-params any?]
+   (let [res (:data (get-modelid-with-http-info modelId optional-params))]
+     (if (:decode-models *api-context*)
+        (st/decode model-spec res st/string-transformer)
         res))))
 
 
