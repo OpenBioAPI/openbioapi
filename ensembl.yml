@@ -722,6 +722,7 @@ paths:
         description: Population name
         schema:
           type: string
+          example: EUROPE
       responses:
         '200':
           description: Successful response
