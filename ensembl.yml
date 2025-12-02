@@ -1,0 +1,4559 @@
+openapi: 3.1.0
+info:
+  title: Ensembl REST API
+  description: 'The Ensembl REST API provides programmatic access to Ensembl data.
+
+
+    Ensembl provides language-agnostic RESTful data access to Ensembl data over HTTP.
+
+
+    __Source:__ https://rest.ensembl.org/
+
+
+    __GitHub:__ https://github.com/Ensembl/ensembl-rest
+
+    '
+  contact:
+    name: Ensembl Helpdesk
+    url: https://www.ensembl.org/Help/Contact
+    email: helpdesk@ensembl.org
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 1.0.0
+servers:
+- url: https://rest.ensembl.org
+  description: Ensembl REST API (GRCh38)
+- url: https://grch37.rest.ensembl.org
+  description: Ensembl REST API (GRCh37)
+tags:
+- name: Archive
+  description: Access archived stable identifiers
+- name: Comparative Genomics
+  description: Gene trees, homologies and genomic alignments
+- name: Cross References
+  description: External references for Ensembl features
+- name: Information
+  description: Server and database information
+- name: Lookup
+  description: Find Ensembl features by identifier or symbol
+- name: Mapping
+  description: Assembly mapping and coordinate conversion
+- name: Ontologies and Taxonomy
+  description: Ontology and taxonomy information
+- name: Overlap
+  description: Features overlapping genomic regions
+- name: Regulation
+  description: Regulatory features
+- name: Sequence
+  description: DNA and protein sequences
+- name: Variation
+  description: Variant information
+paths:
+  /archive/id/{id}:
+    get:
+      tags:
+      - Archive
+      summary: Get Archive ID
+      description: Uses the given identifier to return its latest version
+      operationId: get_archive_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                id: ENSG00000157764
+                type: Gene
+                version: 14
+                latest: ENSG00000157764
+                peptide: null
+                is_current: 1
+                assembly: GRCh38
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /archive/id:
+    post:
+      tags:
+      - Archive
+      summary: Post Archive ID
+      description: Retrieve the latest version for a set of identifiers
+      operationId: post_archive_id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - id
+            example:
+              id:
+              - ENSG00000157764
+              - ENSG00000248378
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  version: 14
+                  latest: ENSG00000157764
+                  type: Gene
+                - id: ENSG00000248378
+                  version: 2
+                  latest: ENSG00000248378
+                  type: Gene
+  /info/ping:
+    get:
+      tags:
+      - Information
+      summary: Ping
+      description: Checks if the service is alive
+      operationId: ping
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ping:
+                    type: integer
+                    format: int32
+                    minimum: 0
+                    maximum: 2147483647
+              example:
+                ping: 1
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/species:
+    get:
+      tags:
+      - Information
+      summary: Get Species
+      description: Lists all available species, their aliases, available adaptor groups and data release
+      operationId: get_species
+      parameters:
+      - name: division
+        in: query
+        description: Filter by Ensembl or Ensembl Genomes division
+        schema:
+          type: string
+          default: EnsemblVertebrates
+          example: ensembl_vertebrates
+      - name: strain_collection
+        in: query
+        description: Filter by strain_collection
+        schema:
+          type: string
+      - name: hide_strain_info
+        in: query
+        description: Show/hide strain and strain_collection info in the output
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                items:
+                - name: homo_sapiens
+                  common_name: Human
+                  display_name: Human
+                  taxon_id: '9606'
+                  assembly: GRCh38
+                  accession: GCA_000001405.28
+                  groups:
+                  - core
+                  - variation
+                  - funcgen
+                  - regulation
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/software:
+    get:
+      tags:
+      - Information
+      summary: Get Software Version
+      description: Shows the current version of the Ensembl API used by the REST server
+      operationId: get_software_version
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                release: 109
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/rest:
+    get:
+      tags:
+      - Information
+      summary: Get REST Version
+      description: Shows the current version of the Ensembl REST API
+      operationId: get_rest_version
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                release: '15.4'
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/data:
+    get:
+      tags:
+      - Information
+      summary: Get Data Releases
+      description: Shows the data releases available on this REST server
+      operationId: get_data_releases
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                releases:
+                - 109
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/analysis/{species}:
+    get:
+      tags:
+      - Information
+      summary: Get Analysis
+      description: List the names of analyses involved in generating Ensembl data
+      operationId: get_analysis
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                items:
+                - logic_name: ensembl
+                  description: Ensembl genes
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/biotypes/{species}:
+    get:
+      tags:
+      - Information
+      summary: Get Biotypes
+      description: List the functional classifications of gene models that Ensembl associates with a particular species
+      operationId: get_biotypes
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - biotype: protein_coding
+                  object_type: gene
+                - biotype: lncRNA
+                  object_type: transcript
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/biotypes/groups:
+    get:
+      tags:
+      - Information
+      summary: List Biotype Groups
+      description: Without argument the list of available biotype groups is returned.
+      operationId: list_biotype_groups
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/biotypes/groups/{group}:
+    get:
+      tags:
+      - Information
+      summary: Get Biotypes by Group
+      description: List the properties of biotypes within a group.
+      operationId: get_biotypes_by_group
+      parameters:
+      - name: group
+        in: path
+        required: true
+        description: Biotype group
+        schema:
+          type: string
+        example: coding
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/biotypes/groups/{group}/object_type/{object_type}:
+    get:
+      tags:
+      - Information
+      summary: Get Biotypes by Group and Object Type
+      description: List the properties of biotypes within a group. Object type (gene or transcript) can be provided for filtering.
+      operationId: get_biotypes_groups_with_object_type
+      parameters:
+      - name: group
+        in: path
+        required: true
+        description: Biotype group
+        schema:
+          type: string
+        example: coding
+      - name: object_type
+        in: path
+        required: true
+        description: Object type (gene or transcript)
+        schema:
+          type: string
+          enum:
+          - gene
+          - transcript
+        example: gene
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/biotypes/name/{name}:
+    get:
+      tags:
+      - Information
+      summary: Get Biotypes by Name
+      description: List the properties of biotypes with a given name
+      operationId: get_biotypes_name
+      parameters:
+      - name: name
+        in: path
+        required: true
+        description: Biotype name
+        schema:
+          type: string
+        example: protein_coding
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/biotypes/name/{name}/object_type/{object_type}:
+    get:
+      tags:
+      - Information
+      summary: Get Biotypes by Name and Object Type
+      description: List the properties of biotypes with a given name filtered by object type
+      operationId: get_biotypes_name_with_object_type
+      parameters:
+      - name: name
+        in: path
+        required: true
+        description: Biotype name
+        schema:
+          type: string
+        example: protein_coding
+      - name: object_type
+        in: path
+        required: true
+        description: Object type (gene or transcript)
+        schema:
+          type: string
+          enum:
+          - gene
+          - transcript
+        example: gene
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/external_dbs/{species}:
+    get:
+      tags:
+      - Information
+      summary: Get External Databases
+      description: Lists all available external sources for a species
+      operationId: get_external_dbs
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: filter
+        in: query
+        description: Restrict external DB searches to a single source or pattern. SQL-LIKE patterns are supported.
+        schema:
+          type: string
+      - name: feature
+        in: query
+        description: Only return external DB entries for a given feature
+        schema:
+          type: string
+          enum:
+          - dna_align_feature
+          - protein_align_feature
+          - unmapped_object
+          - xref
+          - seq_region_synonym
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - name: HGNC
+                  display_name: HGNC Symbol
+                - name: GO
+                  display_name: Gene Ontology
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/compara/methods:
+    get:
+      tags:
+      - Information
+      summary: Get Compara Methods
+      description: List all compara analyses available (an analysis defines the type of comparative data)
+      operationId: get_compara_methods
+      parameters:
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: class
+        in: query
+        description: The class of the method to query for. Regular expression patterns are supported.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+  /info/compara/species_sets/{method}:
+    get:
+      tags:
+      - Information
+      summary: Get Compara Species Sets
+      description: List all collections of species analysed with the specified compara method
+      operationId: get_compara_species_sets
+      parameters:
+      - name: method
+        in: path
+        required: true
+        description: Filter by compara method
+        schema:
+          type: string
+        example: EPO
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+  /info/variation/{species}:
+    get:
+      tags:
+      - Information
+      summary: Get Variation Sources
+      description: List the variation sources used in Ensembl for a species
+      operationId: get_variation_sources
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: filter
+        in: query
+        description: Restrict the variation source searches to a single source
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - name: dbSNP
+                  description: Variants from dbSNP
+                  version: '154'
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/variation/populations/{species}:
+    get:
+      tags:
+      - Information
+      summary: Get Variation Populations
+      description: List all populations for a species
+      operationId: get_variation_populations
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: filter
+        in: query
+        description: Restrict populations returned to e.g. only populations with LD data
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/variation/populations/species/{species}/population/{population_name}:
+    get:
+      tags:
+      - Information
+      summary: Get Population Individuals
+      description: List all individuals for a population from a species
+      operationId: get_population_individuals
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: human
+      - name: population_name
+        in: path
+        required: true
+        description: Population name
+        schema:
+          type: string
+          example: EUROPE
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/variation/consequence_types:
+    get:
+      tags:
+      - Information
+      summary: Get Consequence Types
+      description: Lists all variant consequence types
+      operationId: get_consequence_types
+      parameters:
+      - name: rank
+        in: query
+        description: Include consequence ranking
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/assembly/{species}:
+    get:
+      tags:
+      - Information
+      summary: Get Assembly Info
+      description: List the currently available assemblies for a species, along with toplevel sequences, chromosomes and cytogenetic
+        bands
+      operationId: get_assembly_info
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: bands
+        in: query
+        description: If set to 1, include karyotype band information
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: synonyms
+        in: query
+        description: If set to 1, include information about known synonyms
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/assembly/species/{species}/region/{region_name}:
+    get:
+      tags:
+      - Information
+      summary: Get Assembly Stats
+      description: Returns information about the specified toplevel sequence region for the given species
+      operationId: get_assembly_stats
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: region_name
+        in: path
+        required: true
+        description: The (top level) sequence region name
+        schema:
+          type: string
+          example: X
+        example: X
+      - name: bands
+        in: query
+        description: If set to 1, include karyotype band information
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: synonyms
+        in: query
+        description: If set to 1, include information about known synonyms
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                name: X
+                length: 156040895
+                coord_system: chromosome
+                is_circular: 0
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/divisions:
+    get:
+      tags:
+      - Information
+      summary: Get Divisions
+      description: Get list of all Ensembl divisions for which information is available
+      operationId: get_divisions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: string
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/genomes/{genome_name}:
+    get:
+      tags:
+      - Information
+      summary: Get Genome Info
+      description: Find information about a given genome
+      operationId: get_genome_info
+      parameters:
+      - name: genome_name
+        in: path
+        required: true
+        description: The production name of the genome
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: expand
+        in: query
+        description: Expands the information to include details of sequences
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/genomes/division/{division_name}:
+    get:
+      tags:
+      - Information
+      summary: Get Genomes by Division
+      description: Find information about all genomes in a given division
+      operationId: get_genomes_by_division
+      parameters:
+      - name: division_name
+        in: path
+        required: true
+        description: The name of the division
+        schema:
+          type: string
+        example: EnsemblVertebrates
+      - name: expand
+        in: query
+        description: Expands the information to include details of sequences
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/genomes/taxonomy/{taxon_name}:
+    get:
+      tags:
+      - Information
+      summary: Get Genomes by Taxonomy
+      description: Find information about all genomes beneath a given node of the taxonomy
+      operationId: get_genomes_by_taxonomy
+      parameters:
+      - name: taxon_name
+        in: path
+        required: true
+        description: Taxon name or NCBI taxonomy ID
+        schema:
+          type: string
+        example: Homo sapiens
+      - name: expand
+        in: query
+        description: Expands the information to include details of sequences
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/genomes/assembly/{assembly_id}:
+    get:
+      tags:
+      - Information
+      summary: Get Genome by Assembly
+      description: Find information about a genome with a specified assembly
+      operationId: get_genome_by_assembly
+      parameters:
+      - name: assembly_id
+        in: path
+        required: true
+        description: INSDC assembly ID (optionally versioned)
+        schema:
+          type: string
+        example: GCA_000001405.28
+      - name: expand
+        in: query
+        description: Expands the information to include details of sequences
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /info/genomes/accession/{accession}:
+    get:
+      tags:
+      - Information
+      summary: Get Genomes by Accession
+      description: Find information about genomes containing a specified INSDC accession
+      operationId: get_genomes_by_accession
+      parameters:
+      - name: accession
+        in: path
+        required: true
+        description: INSDC sequence accession (optionally versioned)
+        schema:
+          type: string
+        example: CM000663.2
+      - name: expand
+        in: query
+        description: Expands the information to include details of sequences
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /lookup/id/{id}:
+    get:
+      tags:
+      - Lookup
+      summary: Lookup by ID
+      description: Find the species and database for a single identifier
+      operationId: lookup_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Specify the formats to emit from this endpoint
+        schema:
+          type: string
+          enum:
+          - full
+          - condensed
+          default: full
+      - name: expand
+        in: query
+        description: Expands the search to include any connected features
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: utr
+        in: query
+        description: Include 5' and 3' UTR features. Only available if expand is used.
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: mane
+        in: query
+        description: Include MANE features. Only available if expand is used.
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: phenotypes
+        in: query
+        description: Include phenotypes. Only available for gene objects.
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                id: ENSG00000157764
+                object_type: Gene
+                species: homo_sapiens
+                assembly_name: GRCh38
+                seq_region_name: '7'
+                start: 140719327
+                end: 140924928
+                strand: -1
+                biotype: protein_coding
+                display_name: BRAF
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /lookup/id:
+    post:
+      tags:
+      - Lookup
+      summary: Lookup by IDs (POST)
+      description: Find the species and database for several identifiers
+      operationId: lookup_by_ids
+      parameters:
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Specify the formats to emit from this endpoint
+        schema:
+          type: string
+          enum:
+          - full
+          - condensed
+          default: full
+      - name: expand
+        in: query
+        description: Expands the search to include any connected features
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - ids
+            example:
+              ids:
+              - ENSG00000157764
+              - ENSG00000139618
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                ENSG00000157764:
+                  id: ENSG00000157764
+                  display_name: BRAF
+                  object_type: Gene
+                ENSG00000139618:
+                  id: ENSG00000139618
+                  display_name: BRCA2
+                  object_type: Gene
+  /lookup/symbol/species/{species}/symbol/{symbol}:
+    get:
+      tags:
+      - Lookup
+      summary: Lookup by Symbol
+      description: Find the species and database for a symbol in a linked external database
+      operationId: lookup_by_symbol
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: symbol
+        in: path
+        required: true
+        description: A name or symbol from an annotation source
+        schema:
+          type: string
+          example: BRCA2
+        example: BRCA2
+      - name: format
+        in: query
+        description: Specify the layout of the response
+        schema:
+          type: string
+          enum:
+          - full
+          - condensed
+          default: full
+      - name: expand
+        in: query
+        description: Expands the search to include any connected features
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                id: ENSG00000139618
+                object_type: Gene
+                species: homo_sapiens
+                display_name: BRCA2
+                assembly_name: GRCh38
+                biotype: protein_coding
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /lookup/symbol/{species}:
+    post:
+      tags:
+      - Lookup
+      summary: Lookup by Symbols (POST)
+      description: Find the species and database for a set of symbols. Unknown symbols are omitted from the response.
+      operationId: lookup_by_symbols
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias for the whole batch of symbols
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: format
+        in: query
+        description: Specify the layout of the response
+        schema:
+          type: string
+          enum:
+          - full
+          - condensed
+          default: full
+      - name: expand
+        in: query
+        description: Expands the search to include any connected features
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                symbols:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - symbols
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /sequence/id/{id}:
+    get:
+      tags:
+      - Sequence
+      summary: Get Sequence by ID
+      description: Request multiple types of sequence by stable identifier
+      operationId: get_sequence_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      - name: type
+        in: query
+        description: Type of sequence
+        schema:
+          type: string
+          enum:
+          - genomic
+          - cds
+          - cdna
+          - protein
+          default: genomic
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Format of the data
+        schema:
+          type: string
+          enum:
+          - fasta
+      - name: mask
+        in: query
+        description: Request the sequence masked for repeat sequences
+        schema:
+          type: string
+          enum:
+          - hard
+          - soft
+      - name: mask_feature
+        in: query
+        description: Mask features on the sequence
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: expand_5prime
+        in: query
+        description: Expand the sequence upstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: expand_3prime
+        in: query
+        description: Expand the sequence downstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: multiple_sequences
+        in: query
+        description: Allow the service to return more than 1 sequence per identifier
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: start
+        in: query
+        description: Trim the start of the sequence by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: end
+        in: query
+        description: Trim the end of the sequence by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              schema:
+                type: string
+            text/x-fasta:
+              schema:
+                type: string
+            text/x-seqxml+xml:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                id: ENSG00000157764
+                seq: CTTGAAATAAAGCATGGGCCCTGGACTGGAACATGGTTCTTATCAGGATCTGGGGCC
+                molecule: dna
+                desc: chromosome:GRCh38:7:140719327:140924928:-1
+  /sequence/id:
+    post:
+      tags:
+      - Sequence
+      summary: Get Sequences by IDs (POST)
+      description: Request multiple types of sequence by a stable identifier list
+      operationId: get_sequences_by_ids
+      parameters:
+      - name: type
+        in: query
+        description: Type of sequence
+        schema:
+          type: string
+          enum:
+          - genomic
+          - cds
+          - cdna
+          - protein
+          default: genomic
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Format of the data
+        schema:
+          type: string
+          enum:
+          - fasta
+      - name: mask
+        in: query
+        description: Request the sequence masked for repeat sequences
+        schema:
+          type: string
+          enum:
+          - hard
+          - soft
+      - name: mask_feature
+        in: query
+        description: Mask features on the sequence
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: expand_5prime
+        in: query
+        description: Expand the sequence upstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: expand_3prime
+        in: query
+        description: Expand the sequence downstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - ids
+            example:
+              ids:
+              - ENSG00000157764
+              - ENST00000288602
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  seq: ATGCATGC...
+                  molecule: dna
+                - id: ENST00000288602
+                  seq: ATGCATGC...
+                  molecule: dna
+  /sequence/region/species/{species}/region/{region}:
+    get:
+      tags:
+      - Sequence
+      summary: Get Sequence by Region
+      description: Returns the genomic sequence of the specified region of the given species
+      operationId: get_sequence_by_region
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: region
+        in: path
+        required: true
+        description: Query region (maximum 10Mb)
+        schema:
+          type: string
+          example: X:1000000..1000100:1
+        example: X:1000000..1000100:1
+      - name: format
+        in: query
+        description: Format of the data
+        schema:
+          type: string
+          enum:
+          - fasta
+      - name: mask
+        in: query
+        description: Request the sequence masked for repeat sequences
+        schema:
+          type: string
+          enum:
+          - hard
+          - soft
+      - name: mask_feature
+        in: query
+        description: Mask features on the sequence
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: expand_5prime
+        in: query
+        description: Expand the sequence upstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: expand_3prime
+        in: query
+        description: Expand the sequence downstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: coord_system
+        in: query
+        description: Filter by coordinate system name
+        schema:
+          type: string
+      - name: coord_system_version
+        in: query
+        description: Filter by coordinate system version
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              schema:
+                type: string
+            text/x-fasta:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                id: X:1000000-1000100
+                seq: AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC
+                desc: chromosome:GRCh38:X:1000000:1000100:1
+  /sequence/region/{species}:
+    post:
+      tags:
+      - Sequence
+      summary: Get Sequences by Regions (POST)
+      description: Request multiple types of sequence by a list of regions
+      operationId: get_sequences_by_regions
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: format
+        in: query
+        description: Format of the data
+        schema:
+          type: string
+          enum:
+          - fasta
+      - name: mask
+        in: query
+        description: Request the sequence masked for repeat sequences
+        schema:
+          type: string
+          enum:
+          - hard
+          - soft
+      - name: mask_feature
+        in: query
+        description: Mask features on the sequence
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: expand_5prime
+        in: query
+        description: Expand the sequence upstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: expand_3prime
+        in: query
+        description: Expand the sequence downstream by this many basepairs
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: coord_system
+        in: query
+        description: Filter by coordinate system name
+        schema:
+          type: string
+      - name: coord_system_version
+        in: query
+        description: Filter by coordinate system version
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                regions:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - regions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+  /overlap/region/species/{species}/region/{region}:
+    get:
+      tags:
+      - Overlap
+      summary: Get Features by Region
+      description: Retrieves features that overlap a given region
+      operationId: get_overlap_by_region
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: region
+        in: path
+        required: true
+        description: Query region (maximum 5Mb)
+        schema:
+          type: string
+          example: 7:140424943-140624564
+        example: 7:140424943-140624564
+      - name: feature
+        in: query
+        required: true
+        description: The type of feature to retrieve
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - band
+            - gene
+            - transcript
+            - cds
+            - exon
+            - repeat
+            - simple
+            - misc
+            - variation
+            - somatic_variation
+            - structural_variation
+            - somatic_structural_variation
+            - constrained
+            - regulatory
+            - motif
+            - mane
+      - name: db_type
+        in: query
+        description: Specify the database type to retrieve features from
+        schema:
+          type: string
+          default: core
+      - name: species_set
+        in: query
+        description: The species set name for retrieving constrained elements
+        schema:
+          type: string
+          default: mammals
+      - name: logic_name
+        in: query
+        description: Limit retrieval of genes, transcripts and exons by the name of analysis
+        schema:
+          type: string
+      - name: so_term
+        in: query
+        description: Sequence Ontology term to restrict the variants found
+        schema:
+          type: string
+      - name: variant_set
+        in: query
+        description: Short name of a set to restrict the variants found
+        schema:
+          type: string
+      - name: misc_set
+        in: query
+        description: Miscellaneous set which groups together feature entries
+        schema:
+          type: string
+      - name: biotype
+        in: query
+        description: Functional classification of the gene or transcript to fetch
+        schema:
+          type: string
+      - name: trim_upstream
+        in: query
+        description: Do not return features which overlap upstream end of the region
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: trim_downstream
+        in: query
+        description: Do not return features which overlap the downstream end of the region
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  feature_type: gene
+                  seq_region_name: '7'
+                  start: 140719327
+                  end: 140924928
+                  strand: -1
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-gff3:
+              schema:
+                type: string
+            text/x-bed:
+              schema:
+                type: string
+  /overlap/id/{id}:
+    get:
+      tags:
+      - Overlap
+      summary: Get Features by ID
+      description: Retrieves features that overlap a region defined by the given identifier
+      operationId: get_overlap_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: feature
+        in: query
+        required: true
+        description: The type of feature to retrieve
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - band
+            - gene
+            - transcript
+            - cds
+            - exon
+            - repeat
+            - simple
+            - misc
+            - variation
+            - somatic_variation
+            - structural_variation
+            - somatic_structural_variation
+            - constrained
+            - regulatory
+            - motif
+            - mane
+      - name: species_set
+        in: query
+        description: Filter by species set for retrieving constrained elements
+        schema:
+          type: string
+          default: mammals
+      - name: logic_name
+        in: query
+        description: Limit retrieval of genes, transcripts and exons by a given name of an analysis
+        schema:
+          type: string
+      - name: so_term
+        in: query
+        description: Sequence Ontology term to narrow down the possible variants returned
+        schema:
+          type: string
+      - name: variant_set
+        in: query
+        description: Short name of a set to restrict the variants found
+        schema:
+          type: string
+      - name: misc_set
+        in: query
+        description: Miscellaneous set which groups together feature entries
+        schema:
+          type: string
+      - name: biotype
+        in: query
+        description: The functional classification of the gene or transcript to fetch
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  feature_type: gene
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-gff3:
+              schema:
+                type: string
+            text/x-bed:
+              schema:
+                type: string
+  /overlap/translation/{id}:
+    get:
+      tags:
+      - Overlap
+      summary: Get Features by Translation
+      description: Retrieve features related to a specific Translation as described by its stable ID
+      operationId: get_overlap_by_translation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl translation stable ID
+        schema:
+          type: string
+          example: ENSP00000288602
+        example: ENSP00000288602
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: feature
+        in: query
+        description: Specify the type of features requested for the translation
+        schema:
+          type: string
+          enum:
+          - transcript_variation
+          - protein_feature
+          - residue_overlap
+          - translation_exon
+          - somatic_transcript_variation
+          default: protein_feature
+      - name: type
+        in: query
+        description: Type of data to filter by
+        schema:
+          type: string
+      - name: so_term
+        in: query
+        description: Sequence Ontology term to restrict the variants found
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: PF00069
+                  interpro: IPR000719
+                  hit_name: Protein kinase domain
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /variation/species/{species}/id/{id}:
+    get:
+      tags:
+      - Variation
+      summary: Get Variation by ID
+      description: Uses a variant identifier to return the variation features
+      operationId: get_variation_by_id
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: id
+        in: path
+        required: true
+        description: Variant identifier
+        schema:
+          type: string
+          example: rs56116432
+        example: rs56116432
+      - name: genotypes
+        in: query
+        description: Include individual genotypes
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: phenotypes
+        in: query
+        description: Include phenotypes
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: pops
+        in: query
+        description: Include population allele frequencies
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: population_genotypes
+        in: query
+        description: Include population genotype frequencies
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: genotyping_chips
+        in: query
+        description: Include genotyping chips information
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                name: rs56116432
+                MAF: '0.0010'
+                ambiguity: R
+                var_class: SNP
+                mappings:
+                - location: 7:140453136-140453136
+                  assembly_name: GRCh38
+                  allele_string: A/G
+                  strand: 1
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /variation/{species}:
+    post:
+      tags:
+      - Variation
+      summary: Get Variations by IDs (POST)
+      description: Uses a list of variant identifiers to return the variation features
+      operationId: get_variations_by_ids
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: genotypes
+        in: query
+        description: Include individual genotypes
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: phenotypes
+        in: query
+        description: Include phenotypes
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: pops
+        in: query
+        description: Include population allele frequencies
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: population_genotypes
+        in: query
+        description: Include population genotype frequencies
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - ids
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /variant_recoder/species/{species}/id/{id}:
+    get:
+      tags:
+      - Variation
+      summary: Variant Recoder
+      description: Translate a variant identifier, HGVS notation or genomic SPDI notation to all possible variant IDs, HGVS
+        and genomic SPDI
+      operationId: variant_recoder
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: id
+        in: path
+        required: true
+        description: Variant ID, HGVS notation or genomic SPDI notation
+        schema:
+          type: string
+          example: rs56116432
+        example: rs56116432
+      - name: fields
+        in: query
+        description: Comma-separated list of identifiers/notations to include
+        schema:
+          type: string
+          default: id,hgvsg,hgvsc,hgvsp,spdi
+      - name: gencode_basic
+        in: query
+        description: Limit your analysis to transcripts belonging to the GENCODE basic set
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: failed
+        in: query
+        description: Include variants flagged as failed by Ensembl's QC pipeline
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: minimal
+        in: query
+        description: Convert alleles to their most minimal representation
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: vcf_string
+        in: query
+        description: VCF represented in a string
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: var_synonyms
+        in: query
+        description: Known variation synonyms and their sources
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: ga4gh_vrs
+        in: query
+        description: Add GA4GH Variation Representation Specification (VRS) notation
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - input: rs56116432
+                  id: rs56116432
+                  hgvsg:
+                  - 7:g.140453136A>G
+                  hgvsc:
+                  - ENST00000288602.6:c.1799T>C
+                  hgvsp:
+                  - ENSP00000288602.6:p.Val600Glu
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /variant_recoder/{species}:
+    post:
+      tags:
+      - Variation
+      summary: Variant Recoder (POST)
+      description: Translate a list of variant identifiers, HGVS notations or genomic SPDI notations
+      operationId: variant_recoder_post
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: fields
+        in: query
+        description: Comma-separated list of identifiers/notations to include
+        schema:
+          type: string
+          default: id,hgvsg,hgvsc,hgvsp,spdi
+      - name: gencode_basic
+        in: query
+        description: Limit your analysis to transcripts belonging to the GENCODE basic set
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: failed
+        in: query
+        description: Include variants flagged as failed by Ensembl's QC pipeline
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: minimal
+        in: query
+        description: Convert alleles to their most minimal representation
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: vcf_string
+        in: query
+        description: VCF represented in a string
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: var_synonyms
+        in: query
+        description: Known variation synonyms and their sources
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: ga4gh_vrs
+        in: query
+        description: Add GA4GH Variation Representation Specification (VRS) notation
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required:
+              - ids
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /variation/{species}/pmid/{pmid}:
+    get:
+      tags:
+      - Variation
+      summary: Get Variations by PMID
+      description: Fetch variants by publication using PubMed reference number
+      operationId: get_variations_by_pmid
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: pmid
+        in: path
+        required: true
+        description: PubMed reference number (PMID)
+        schema:
+          type: string
+        example: '26318936'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /variation/{species}/pmcid/{pmcid}:
+    get:
+      tags:
+      - Variation
+      summary: Get Variations by PMCID
+      description: Fetch variants by publication using PubMed Central reference number
+      operationId: get_variations_by_pmcid
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: pmcid
+        in: path
+        required: true
+        description: PubMed Central reference number (PMCID)
+        schema:
+          type: string
+        example: PMC5002951
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /xrefs/symbol/species/{species}/symbol/{symbol}:
+    get:
+      tags:
+      - Cross References
+      summary: Lookup External References by Symbol
+      description: Looks up an external symbol and returns all Ensembl objects linked to it
+      operationId: get_xrefs_by_symbol
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: symbol
+        in: path
+        required: true
+        description: Symbol or display name of a gene
+        schema:
+          type: string
+          example: BRCA2
+        example: BRCA2
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: external_db
+        in: query
+        description: Filter by external database
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+          default: core
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000139618
+                  type: gene
+                  display_id: BRCA2
+                  primary_id: ENSG00000139618
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /xrefs/id/{id}:
+    get:
+      tags:
+      - Cross References
+      summary: Get External References by ID
+      description: Perform lookups of Ensembl Identifiers and retrieve their external references
+      operationId: get_xrefs_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl Stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: all_levels
+        in: query
+        description: Set to find all genetic features linked to the stable ID
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: external_db
+        in: query
+        description: Filter by external database
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+          default: core
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - dbname: HGNC
+                  display_id: BRAF
+                  primary_id: HGNC:1097
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /xrefs/name/species/{species}/name/{name}:
+    get:
+      tags:
+      - Cross References
+      summary: Get External References by Name
+      description: Performs a lookup based upon the primary accession or display label of an external reference
+      operationId: get_xrefs_by_name
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: name
+        in: path
+        required: true
+        description: Symbol or display name of a gene
+        schema:
+          type: string
+          example: BRCA2
+        example: BRCA2
+      - name: external_db
+        in: query
+        description: Filter by external database
+        schema:
+          type: string
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+          default: core
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - dbname: HGNC
+                  display_id: BRCA2
+                  primary_id: HGNC:1101
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /map/species/{species}/from/{asm_one}/region/{region}/to/{asm_two}:
+    get:
+      tags:
+      - Mapping
+      summary: Map Assembly
+      description: Convert the co-ordinates of one assembly to another
+      operationId: map_assembly
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: asm_one
+        in: path
+        required: true
+        description: Version of the input assembly
+        schema:
+          type: string
+          example: GRCh37
+        example: GRCh37
+      - name: region
+        in: path
+        required: true
+        description: Query region
+        schema:
+          type: string
+          example: X:1000000..1000100:1
+        example: X:1000000..1000100:1
+      - name: asm_two
+        in: path
+        required: true
+        description: Version of the output assembly
+        schema:
+          type: string
+          example: GRCh38
+        example: GRCh38
+      - name: coord_system
+        in: query
+        description: Name of the input coordinate system
+        schema:
+          type: string
+          default: chromosome
+      - name: target_coord_system
+        in: query
+        description: Name of the output coordinate system
+        schema:
+          type: string
+          default: chromosome
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                mappings:
+                - original:
+                    seq_region_name: X
+                    coord_system: chromosome
+                    start: 1000000
+                    end: 1000100
+                    strand: 1
+                  mapped:
+                    seq_region_name: X
+                    coord_system: chromosome
+                    start: 1039365
+                    end: 1039465
+                    strand: 1
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /map/cdna/id/{id}/region/{region}:
+    get:
+      tags:
+      - Mapping
+      summary: Map cDNA to Genomic
+      description: Convert from cDNA coordinates to genomic coordinates
+      operationId: map_cdna
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl transcript stable ID
+        schema:
+          type: string
+          example: ENST00000288602
+        example: ENST00000288602
+      - name: region
+        in: path
+        required: true
+        description: Query region in cDNA coordinates
+        schema:
+          type: string
+          example: X:1000000..1000100:1
+        example: 100..300
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: include_original_region
+        in: query
+        description: Include original input region along with the target region mappings
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                mappings:
+                - start: 140719328
+                  end: 140719528
+                  seq_region_name: '7'
+                  rank: 1
+                  strand: -1
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /map/cds/id/{id}/region/{region}:
+    get:
+      tags:
+      - Mapping
+      summary: Map CDS to Genomic
+      description: Convert from CDS coordinates to genomic coordinates
+      operationId: map_cds
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl transcript stable ID
+        schema:
+          type: string
+          example: ENST00000288602
+        example: ENST00000288602
+      - name: region
+        in: path
+        required: true
+        description: Query region in CDS coordinates
+        schema:
+          type: string
+          example: X:1000000..1000100:1
+        example: 1..100
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      - name: include_original_region
+        in: query
+        description: Include original input region along with the target region mappings
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                mappings:
+                - start: 140719328
+                  end: 140719428
+                  seq_region_name: '7'
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /map/translation/id/{id}/region/{region}:
+    get:
+      tags:
+      - Mapping
+      summary: Map Translation to Genomic
+      description: Convert from protein (translation) coordinates to genomic coordinates
+      operationId: map_translation
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl translation stable ID
+        schema:
+          type: string
+          example: ENSP00000288602
+        example: ENSP00000288602
+      - name: region
+        in: path
+        required: true
+        description: Query region in protein coordinates
+        schema:
+          type: string
+          example: X:1000000..1000100:1
+        example: 100..300
+      - name: species
+        in: query
+        description: Species name/alias
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                mappings:
+                - start: 140719028
+                  end: 140719628
+                  seq_region_name: '7'
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /ontology/id/{id}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Ontology Term by ID
+      description: Search for an ontological term by its namespaced identifier
+      operationId: get_ontology_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An ontology term identifier
+        schema:
+          type: string
+          example: GO:0005667
+        example: GO:0005667
+      - name: relation
+        in: query
+        description: The types of relationships to include in the output
+        schema:
+          type: string
+      - name: simple
+        in: query
+        description: If set the API will avoid the fetching of parent and child terms
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                accession: GO:0005667
+                name: transcription factor complex
+                namespace: cellular_component
+                definition: A protein complex that is capable of associating with DNA...
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /ontology/name/{name}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Ontology Terms by Name
+      description: Search for a list of ontological terms by their name
+      operationId: get_ontology_by_name
+      parameters:
+      - name: name
+        in: path
+        required: true
+        description: An ontology name. SQL wildcards are supported
+        schema:
+          type: string
+          example: transcription factor complex
+        example: transcription factor complex
+      - name: ontology
+        in: query
+        description: Filter by ontology
+        schema:
+          type: string
+      - name: relation
+        in: query
+        description: The types of relationships to include in the output
+        schema:
+          type: string
+      - name: simple
+        in: query
+        description: If set the API will avoid the fetching of parent and child terms
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - accession: GO:0005667
+                  name: transcription factor complex
+                  namespace: cellular_component
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /ontology/ancestors/{id}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Ontology Ancestors
+      description: Reconstruct the entire ancestry of a term from is_a and part_of relationships
+      operationId: get_ontology_ancestors
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An ontology term identifier
+        schema:
+          type: string
+          example: GO:0005667
+        example: GO:0005667
+      - name: ontology
+        in: query
+        description: Filter by ontology
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - accession: GO:0032991
+                  name: protein-containing complex
+                - accession: GO:0005575
+                  name: cellular_component
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /ontology/descendants/{id}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Ontology Descendants
+      description: Find all the terms descended from a given term
+      operationId: get_ontology_descendants
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An ontology term identifier
+        schema:
+          type: string
+          example: GO:0005667
+        example: GO:0005667
+      - name: ontology
+        in: query
+        description: Filter by ontology
+        schema:
+          type: string
+      - name: subset
+        in: query
+        description: Filter terms by the specified subset
+        schema:
+          type: string
+      - name: closest_term
+        in: query
+        description: If true return only the closest terms to the specified term
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: zero_distance
+        in: query
+        description: Return terms with a distance of 0
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - accession: GO:0090575
+                  name: RNA polymerase II transcription factor complex
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /ontology/ancestors/chart/{id}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Ontology Ancestors Chart
+      description: Reconstruct the entire ancestry of a term from is_a and part_of relationships as a chart
+      operationId: get_ontology_ancestors_chart
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An ontology term identifier
+        schema:
+          type: string
+        example: GO:0005667
+      - name: ontology
+        in: query
+        description: Filter by ontology
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /taxonomy/id/{id}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Taxonomy by ID
+      description: Search for a taxonomic term by its identifier or name
+      operationId: get_taxonomy_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A taxon identifier. Can be a NCBI taxon id or a name
+        schema:
+          type: string
+          example: '9606'
+        example: '9606'
+      - name: simple
+        in: query
+        description: If set the API will avoid the fetching of parent and child terms
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                id: '9606'
+                scientific_name: Homo sapiens
+                name: human
+                parent:
+                  id: '9605'
+                  name: Homo
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /taxonomy/classification/{id}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Taxonomy Classification
+      description: Return the taxonomic classification of a taxon node
+      operationId: get_taxonomy_classification
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A taxon identifier. Can be a NCBI taxon id or a name
+        schema:
+          type: string
+          example: '9606'
+        example: '9606'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: '9606'
+                  scientific_name: Homo sapiens
+                - id: '9605'
+                  scientific_name: Homo
+                - id: '9604'
+                  scientific_name: Hominidae
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /taxonomy/name/{name}:
+    get:
+      tags:
+      - Ontologies and Taxonomy
+      summary: Get Taxonomy by Name
+      description: Search for a taxonomic id by a non-scientific name
+      operationId: get_taxonomy_by_name
+      parameters:
+      - name: name
+        in: path
+        required: true
+        description: A non-scientific species name. Can include SQL wildcards
+        schema:
+          type: string
+          example: human
+        example: human
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - id: '9606'
+                  scientific_name: Homo sapiens
+                  name: human
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /homology/id/species/{species}/id/{id}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get Homology by Species and Gene ID
+      description: Retrieves homology information (orthologs) by species and Ensembl gene id
+      operationId: get_homology_by_species_and_id
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: format
+        in: query
+        description: Layout of the response
+        schema:
+          type: string
+          enum:
+          - full
+          - condensed
+      - name: type
+        in: query
+        description: The type of homology to return
+        schema:
+          type: string
+          enum:
+          - orthologues
+          - paralogues
+          - projections
+          - all
+      - name: target_species
+        in: query
+        description: Filter by species
+        schema:
+          type: string
+      - name: target_taxon
+        in: query
+        description: Filter by taxon
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: aligned
+        in: query
+        description: Return the aligned string if true
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: sequence
+        in: query
+        description: The type of sequence to bring back
+        schema:
+          type: string
+          enum:
+          - none
+          - cdna
+          - protein
+      - name: cigar_line
+        in: query
+        description: Return the aligned sequence encoded in CIGAR format
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                data:
+                - id: ENSG00000157764
+                  homologies:
+                  - type: ortholog_one2one
+                    id: ENSMUSG00000002413
+                    species: mus_musculus
+                    protein_id: ENSMUSP00000002482
+                    perc_id: 90.5
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-orthoxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /homology/symbol/species/{species}/symbol/{symbol}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get Homology by Symbol
+      description: Retrieves homology information (orthologs) by symbol
+      operationId: get_homology_by_symbol
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: symbol
+        in: path
+        required: true
+        description: Symbol or display name of a gene
+        schema:
+          type: string
+          example: BRCA2
+        example: BRCA2
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: external_db
+        in: query
+        description: Filter by external database
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Layout of the response
+        schema:
+          type: string
+          enum:
+          - full
+          - condensed
+      - name: type
+        in: query
+        description: The type of homology to return
+        schema:
+          type: string
+          enum:
+          - orthologues
+          - paralogues
+          - projections
+          - all
+      - name: target_species
+        in: query
+        description: Filter by species
+        schema:
+          type: string
+      - name: target_taxon
+        in: query
+        description: Filter by taxon
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: aligned
+        in: query
+        description: Return the aligned string if true
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: sequence
+        in: query
+        description: The type of sequence to bring back
+        schema:
+          type: string
+          enum:
+          - none
+          - cdna
+          - protein
+      - name: cigar_line
+        in: query
+        description: Return the aligned sequence encoded in CIGAR format
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                data:
+                - id: ENSG00000139618
+                  homologies:
+                  - type: ortholog_one2one
+                    id: ENSMUSG00000041147
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-orthoxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /genetree/id/{id}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get Gene Tree by ID
+      description: Retrieves a gene tree for a gene tree stable identifier
+      operationId: get_gene_tree_by_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl genetree ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSGT00390000003602
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: aligned
+        in: query
+        description: Return the aligned string if true
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: cigar_line
+        in: query
+        description: Return the aligned sequence encoded in CIGAR format
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: sequence
+        in: query
+        description: The type of sequence to bring back
+        schema:
+          type: string
+          enum:
+          - none
+          - cdna
+          - protein
+          default: protein
+      - name: nh_format
+        in: query
+        description: The format of a NH (New Hampshire) request
+        schema:
+          type: string
+          enum:
+          - full
+          - display_label_composite
+          - simple
+          - species
+          - species_short_name
+          - ncbi_taxon
+          - ncbi_name
+          - phylip
+          - gene_stable_id
+          - genome_gene_stable_id
+          - genome_product_stable_id
+          default: simple
+      - name: prune_species
+        in: query
+        description: Prune the tree by species
+        schema:
+          type: string
+      - name: prune_taxon
+        in: query
+        description: Prune the tree by taxon
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: clusterset_id
+        in: query
+        description: Name of the gene-tree resource being queried
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/x-phyloxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-orthoxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-nh:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                tree:
+                  id: ENSGT00390000003602
+                  rooted: 1
+                  type: gene_tree
+  /genetree/member/id/species/{species}/id/{id}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get Gene Tree by Member ID
+      description: Retrieves the gene tree that contains the gene / transcript / translation stable identifier
+      operationId: get_gene_tree_by_member_id
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+          example: ENSG00000157764
+        example: ENSG00000157764
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: aligned
+        in: query
+        description: Return the aligned string if true
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: cigar_line
+        in: query
+        description: Return the aligned sequence encoded in CIGAR format
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: sequence
+        in: query
+        description: The type of sequence to bring back
+        schema:
+          type: string
+          enum:
+          - none
+          - cdna
+          - protein
+          default: protein
+      - name: nh_format
+        in: query
+        description: The format of a NH (New Hampshire) request
+        schema:
+          type: string
+          enum:
+          - full
+          - display_label_composite
+          - simple
+          - species
+          - species_short_name
+          - ncbi_taxon
+          - ncbi_name
+          - phylip
+          - gene_stable_id
+          - genome_gene_stable_id
+          - genome_product_stable_id
+          default: simple
+      - name: prune_species
+        in: query
+        description: Prune the tree by species
+        schema:
+          type: string
+      - name: prune_taxon
+        in: query
+        description: Prune the tree by taxon
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: clusterset_id
+        in: query
+        description: Name of the gene-tree resource being queried
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/x-phyloxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-orthoxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-nh:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                tree:
+                  id: ENSGT00390000003602
+                  rooted: 1
+  /genetree/member/symbol/species/{species}/symbol/{symbol}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get Gene Tree by Member Symbol
+      description: Retrieves the gene tree that contains the gene identified by a symbol
+      operationId: get_gene_tree_by_member_symbol
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: symbol
+        in: path
+        required: true
+        description: Symbol or display name of a gene
+        schema:
+          type: string
+        example: BRCA2
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+          default: core
+      - name: external_db
+        in: query
+        description: Filter by external database
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: aligned
+        in: query
+        description: Return the aligned string if true
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: cigar_line
+        in: query
+        description: Return the aligned sequence encoded in CIGAR format
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          default: 0
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: sequence
+        in: query
+        description: The type of sequence to bring back
+        schema:
+          type: string
+          enum:
+          - none
+          - cdna
+          - protein
+          default: protein
+      - name: nh_format
+        in: query
+        description: The format of a NH (New Hampshire) request
+        schema:
+          type: string
+          enum:
+          - full
+          - display_label_composite
+          - simple
+          - species
+          - species_short_name
+          - ncbi_taxon
+          - ncbi_name
+          - phylip
+          - gene_stable_id
+          - genome_gene_stable_id
+          - genome_product_stable_id
+          default: simple
+      - name: prune_species
+        in: query
+        description: Prune the tree by species
+        schema:
+          type: string
+      - name: prune_taxon
+        in: query
+        description: Prune the tree by taxon
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 2147483647
+      - name: clusterset_id
+        in: query
+        description: Name of the gene-tree resource being queried
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/x-phyloxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-orthoxml+xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-nh:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /alignment/region/species/{species}/region/{region}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get Genomic Alignment by Region
+      description: Retrieves genomic alignments as separate blocks based on a region and species
+      operationId: get_alignment_by_region
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: region
+        in: path
+        required: true
+        description: Query region (maximum 10Mb)
+        schema:
+          type: string
+          example: X:1000000..1000100:1
+        example: X:1000000..1000100:1
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: aligned
+        in: query
+        description: Return the aligned string if true
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      - name: mask
+        in: query
+        description: Request the sequence masked for repeat sequences
+        schema:
+          type: string
+          enum:
+          - hard
+          - soft
+      - name: species_set_group
+        in: query
+        description: The species set group name of the multiple alignment
+        schema:
+          type: string
+      - name: species_set
+        in: query
+        description: The set of species used to define the pairwise alignment
+        schema:
+          type: array
+          items:
+            type: string
+      - name: method
+        in: query
+        description: The alignment method
+        schema:
+          type: string
+          enum:
+          - EPO
+          - EPO_EXTENDED
+          - PECAN
+          - LASTZ_NET
+          - BLASTZ_NET
+          - TRANSLATED_BLAT_NET
+          - CACTUS_HAL
+          - CACTUS_HAL_PW
+          - CACTUS_DB
+      - name: display_species_set
+        in: query
+        description: Subset of species in the alignment to be displayed
+        schema:
+          type: array
+          items:
+            type: string
+      - name: compact
+        in: query
+        description: Applicable to EPO_EXTENDED alignments
+        schema:
+          type: integer
+          enum:
+          - 0
+          - 1
+          format: int32
+          minimum: 0
+          maximum: 1
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                additionalProperties: true
+              example:
+                items:
+                - alignments:
+                  - species: homo_sapiens
+                    seq: ATGCATGC...
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+            text/x-phyloxml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /cafe/genetree/id/{id}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get CAFE Tree by Gene Tree ID
+      description: Retrieves a cafe tree of the gene tree using the gene tree stable identifier
+      operationId: get_cafe_tree_by_gene_tree_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl genetree ID
+        schema:
+          type: string
+        example: ENSGT00390000003602
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: nh_format
+        in: query
+        description: The format of a NH (New Hampshire) request
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/x-nh:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /cafe/genetree/member/id/species/{species}/id/{id}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get CAFE Tree by Member ID
+      description: Retrieves the cafe tree of the gene tree that contains the gene / transcript / translation stable identifier
+      operationId: get_cafe_tree_by_member_id
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: id
+        in: path
+        required: true
+        description: An Ensembl stable ID
+        schema:
+          type: string
+        example: ENSG00000157764
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: nh_format
+        in: query
+        description: The format of a NH (New Hampshire) request
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/x-nh:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /cafe/genetree/member/symbol/species/{species}/symbol/{symbol}:
+    get:
+      tags:
+      - Comparative Genomics
+      summary: Get CAFE Tree by Member Symbol
+      description: Retrieves the cafe tree of the gene tree that contains the gene identified by a symbol
+      operationId: get_cafe_tree_by_member_symbol
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+        example: homo_sapiens
+      - name: symbol
+        in: path
+        required: true
+        description: Symbol or display name of a gene
+        schema:
+          type: string
+        example: BRCA2
+      - name: db_type
+        in: query
+        description: Restrict the search to a database other than the default
+        schema:
+          type: string
+          default: core
+      - name: external_db
+        in: query
+        description: Filter by external database
+        schema:
+          type: string
+      - name: object_type
+        in: query
+        description: Filter by feature type
+        schema:
+          type: string
+      - name: compara
+        in: query
+        description: Name of the compara database to use
+        schema:
+          type: string
+          default: vertebrates
+      - name: nh_format
+        in: query
+        description: The format of a NH (New Hampshire) request
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/x-nh:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+  /species/{species}/binding_matrix/{binding_matrix_stable_id}:
+    get:
+      tags:
+      - Regulation
+      summary: Get Binding Matrix
+      description: Return the specified binding matrix
+      operationId: get_binding_matrix
+      parameters:
+      - name: species
+        in: path
+        required: true
+        description: Species name/alias
+        schema:
+          type: string
+          example: homo_sapiens
+        example: homo_sapiens
+      - name: binding_matrix_stable_id
+        in: path
+        required: true
+        description: Stable ID of binding matrix
+        schema:
+          type: string
+          example: ENSPFM0001
+        example: ENSPFM0001
+      - name: unit
+        in: query
+        description: Unit of the matrix elements
+        schema:
+          type: string
+          enum:
+          - frequencies
+          - probabilities
+          - bits
+          default: frequencies
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
+              example:
+                stable_id: ENSPFM0001
+                matrix:
+                - - 0.1
+                  - 0.2
+                  - 0.3
+                  - 0.4
+                - - 0.2
+                  - 0.3
+                  - 0.2
+                  - 0.3
+            text/xml:
+              schema:
+                type: object
+                properties: {}
+                additionalProperties: true
