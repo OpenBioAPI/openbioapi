@@ -3048,7 +3048,7 @@ paths:
         description: Query region in cDNA coordinates
         schema:
           type: string
-          example: 100..300
+          example: X:1000000..1000100:1
         example: 100..300
       - name: species
         in: query
@@ -3110,7 +3110,7 @@ paths:
         description: Query region in CDS coordinates
         schema:
           type: string
-          example: 1..100
+          example: X:1000000..1000100:1
         example: 1..100
       - name: species
         in: query
@@ -3170,7 +3170,7 @@ paths:
         description: Query region in protein coordinates
         schema:
           type: string
-          example: 100..300
+          example: X:1000000..1000100:1
         example: 100..300
       - name: species
         in: query
@@ -3844,7 +3844,7 @@ paths:
         description: An Ensembl genetree ID
         schema:
           type: string
-          example: ENSGT00390000003602
+          example: ENSG00000157764
         example: ENSGT00390000003602
       - name: compara
         in: query
