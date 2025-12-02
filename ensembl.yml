@@ -1,14 +1,18 @@
 openapi: 3.1.0
 info:
   title: Ensembl REST API
-  description: |
-    The Ensembl REST API provides programmatic access to Ensembl data.
+  description: 'The Ensembl REST API provides programmatic access to Ensembl data.
+
 
     Ensembl provides language-agnostic RESTful data access to Ensembl data over HTTP.
 
+
     __Source:__ https://rest.ensembl.org/
 
+
     __GitHub:__ https://github.com/Ensembl/ensembl-rest
+
+    '
   contact:
     name: Ensembl Helpdesk
     url: https://www.ensembl.org/Help/Contact
@@ -60,6 +64,7 @@ paths:
         description: An Ensembl stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       responses:
         '200':
@@ -70,6 +75,14 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                id: ENSG00000157764
+                type: Gene
+                version: 14
+                latest: ENSG00000157764
+                peptide: null
+                is_current: 1
+                assembly: GRCh38
             text/xml:
               schema:
                 type: object
@@ -95,6 +108,10 @@ paths:
                     type: string
               required:
               - id
+            example:
+              id:
+              - ENSG00000157764
+              - ENSG00000248378
       responses:
         '200':
           description: Successful response
@@ -108,6 +125,16 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  version: 14
+                  latest: ENSG00000157764
+                  type: Gene
+                - id: ENSG00000248378
+                  version: 2
+                  latest: ENSG00000248378
+                  type: Gene
   /info/ping:
     get:
       tags:
@@ -128,6 +155,8 @@ paths:
                     format: int32
                     minimum: 0
                     maximum: 2147483647
+              example:
+                ping: 1
             text/xml:
               schema:
                 type: object
@@ -147,6 +176,7 @@ paths:
         schema:
           type: string
           default: EnsemblVertebrates
+          example: ensembl_vertebrates
       - name: strain_collection
         in: query
         description: Filter by strain_collection
@@ -173,6 +203,19 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                items:
+                - name: homo_sapiens
+                  common_name: Human
+                  display_name: Human
+                  taxon_id: '9606'
+                  assembly: GRCh38
+                  accession: GCA_000001405.28
+                  groups:
+                  - core
+                  - variation
+                  - funcgen
+                  - regulation
             text/xml:
               schema:
                 type: object
@@ -194,6 +237,8 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                release: 109
             text/xml:
               schema:
                 type: object
@@ -215,6 +260,8 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                release: '15.4'
             text/xml:
               schema:
                 type: object
@@ -236,6 +283,9 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                releases:
+                - 109
             text/xml:
               schema:
                 type: object
@@ -255,6 +305,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       responses:
         '200':
@@ -265,6 +316,10 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                items:
+                - logic_name: ensembl
+                  description: Ensembl genes
             text/xml:
               schema:
                 type: object
@@ -284,6 +339,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       responses:
         '200':
@@ -298,6 +354,12 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - biotype: protein_coding
+                  object_type: gene
+                - biotype: lncRNA
+                  object_type: transcript
             text/xml:
               schema:
                 type: object
@@ -449,6 +511,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: filter
         in: query
@@ -479,6 +542,12 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - name: HGNC
+                  display_name: HGNC Symbol
+                - name: GO
+                  display_name: Gene Ontology
             text/xml:
               schema:
                 type: object
@@ -564,6 +633,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: filter
         in: query
@@ -583,6 +653,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - name: dbSNP
+                  description: Variants from dbSNP
+                  version: '154'
             text/xml:
               schema:
                 type: object
@@ -771,6 +846,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: region_name
         in: path
@@ -778,6 +854,7 @@ paths:
         description: The (top level) sequence region name
         schema:
           type: string
+          example: X
         example: X
       - name: bands
         in: query
@@ -812,6 +889,11 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                name: X
+                length: 156040895
+                coord_system: chromosome
+                is_circular: 0
             text/xml:
               schema:
                 type: object
@@ -1068,6 +1150,7 @@ paths:
         description: An Ensembl stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       - name: species
         in: query
@@ -1145,6 +1228,17 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                id: ENSG00000157764
+                object_type: Gene
+                species: homo_sapiens
+                assembly_name: GRCh38
+                seq_region_name: '7'
+                start: 140719327
+                end: 140924928
+                strand: -1
+                biotype: protein_coding
+                display_name: BRAF
             text/xml:
               schema:
                 type: object
@@ -1207,6 +1301,10 @@ paths:
                     type: string
               required:
               - ids
+            example:
+              ids:
+              - ENSG00000157764
+              - ENSG00000139618
       responses:
         '200':
           description: Successful response
@@ -1216,6 +1314,15 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                ENSG00000157764:
+                  id: ENSG00000157764
+                  display_name: BRAF
+                  object_type: Gene
+                ENSG00000139618:
+                  id: ENSG00000139618
+                  display_name: BRCA2
+                  object_type: Gene
   /lookup/symbol/species/{species}/symbol/{symbol}:
     get:
       tags:
@@ -1230,6 +1337,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: symbol
         in: path
@@ -1237,6 +1345,7 @@ paths:
         description: A name or symbol from an annotation source
         schema:
           type: string
+          example: BRCA2
         example: BRCA2
       - name: format
         in: query
@@ -1267,6 +1376,13 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                id: ENSG00000139618
+                object_type: Gene
+                species: homo_sapiens
+                display_name: BRCA2
+                assembly_name: GRCh38
+                biotype: protein_coding
             text/xml:
               schema:
                 type: object
@@ -1348,6 +1464,7 @@ paths:
         description: An Ensembl stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       - name: type
         in: query
@@ -1464,6 +1581,11 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                id: ENSG00000157764
+                seq: CTTGAAATAAAGCATGGGCCCTGGACTGGAACATGGTTCTTATCAGGATCTGGGGCC
+                molecule: dna
+                desc: chromosome:GRCh38:7:140719327:140924928:-1
   /sequence/id:
     post:
       tags:
@@ -1554,6 +1676,10 @@ paths:
                     type: string
               required:
               - ids
+            example:
+              ids:
+              - ENSG00000157764
+              - ENST00000288602
       responses:
         '200':
           description: Successful response
@@ -1567,6 +1693,14 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  seq: ATGCATGC...
+                  molecule: dna
+                - id: ENST00000288602
+                  seq: ATGCATGC...
+                  molecule: dna
   /sequence/region/species/{species}/region/{region}:
     get:
       tags:
@@ -1581,6 +1715,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: region
         in: path
@@ -1588,6 +1723,7 @@ paths:
         description: Query region (maximum 10Mb)
         schema:
           type: string
+          example: X:1000000..1000100:1
         example: X:1000000..1000100:1
       - name: format
         in: query
@@ -1657,6 +1793,10 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                id: X:1000000-1000100
+                seq: AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC
+                desc: chromosome:GRCh38:X:1000000:1000100:1
   /sequence/region/{species}:
     post:
       tags:
@@ -1765,6 +1905,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: region
         in: path
@@ -1772,6 +1913,7 @@ paths:
         description: Query region (maximum 5Mb)
         schema:
           type: string
+          example: 7:140424943-140624564
         example: 7:140424943-140624564
       - name: feature
         in: query
@@ -1872,6 +2014,14 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  feature_type: gene
+                  seq_region_name: '7'
+                  start: 140719327
+                  end: 140924928
+                  strand: -1
             text/xml:
               schema:
                 type: object
@@ -1897,6 +2047,7 @@ paths:
         description: An Ensembl stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       - name: species
         in: query
@@ -1982,6 +2133,10 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000157764
+                  feature_type: gene
             text/xml:
               schema:
                 type: object
@@ -2007,6 +2162,7 @@ paths:
         description: An Ensembl translation stable ID
         schema:
           type: string
+          example: ENSP00000288602
         example: ENSP00000288602
       - name: species
         in: query
@@ -2053,6 +2209,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: PF00069
+                  interpro: IPR000719
+                  hit_name: Protein kinase domain
             text/xml:
               schema:
                 type: object
@@ -2072,6 +2233,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: id
         in: path
@@ -2079,6 +2241,7 @@ paths:
         description: Variant identifier
         schema:
           type: string
+          example: rs56116432
         example: rs56116432
       - name: genotypes
         in: query
@@ -2149,6 +2312,16 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                name: rs56116432
+                MAF: '0.0010'
+                ambiguity: R
+                var_class: SNP
+                mappings:
+                - location: 7:140453136-140453136
+                  assembly_name: GRCh38
+                  allele_string: A/G
+                  strand: 1
             text/xml:
               schema:
                 type: object
@@ -2259,6 +2432,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: id
         in: path
@@ -2266,6 +2440,7 @@ paths:
         description: Variant ID, HGVS notation or genomic SPDI notation
         schema:
           type: string
+          example: rs56116432
         example: rs56116432
       - name: fields
         in: query
@@ -2358,6 +2533,16 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - input: rs56116432
+                  id: rs56116432
+                  hgvsg:
+                  - 7:g.140453136A>G
+                  hgvsc:
+                  - ENST00000288602.6:c.1799T>C
+                  hgvsp:
+                  - ENSP00000288602.6:p.Val600Glu
             text/xml:
               schema:
                 type: object
@@ -2581,6 +2766,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: symbol
         in: path
@@ -2588,6 +2774,7 @@ paths:
         description: Symbol or display name of a gene
         schema:
           type: string
+          example: BRCA2
         example: BRCA2
       - name: object_type
         in: query
@@ -2618,6 +2805,12 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: ENSG00000139618
+                  type: gene
+                  display_id: BRCA2
+                  primary_id: ENSG00000139618
             text/xml:
               schema:
                 type: object
@@ -2637,6 +2830,7 @@ paths:
         description: An Ensembl Stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       - name: species
         in: query
@@ -2684,6 +2878,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - dbname: HGNC
+                  display_id: BRAF
+                  primary_id: HGNC:1097
             text/xml:
               schema:
                 type: object
@@ -2703,6 +2902,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: name
         in: path
@@ -2710,6 +2910,7 @@ paths:
         description: Symbol or display name of a gene
         schema:
           type: string
+          example: BRCA2
         example: BRCA2
       - name: external_db
         in: query
@@ -2735,6 +2936,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - dbname: HGNC
+                  display_id: BRCA2
+                  primary_id: HGNC:1101
             text/xml:
               schema:
                 type: object
@@ -2754,6 +2960,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: asm_one
         in: path
@@ -2761,6 +2968,7 @@ paths:
         description: Version of the input assembly
         schema:
           type: string
+          example: GRCh37
         example: GRCh37
       - name: region
         in: path
@@ -2768,6 +2976,7 @@ paths:
         description: Query region
         schema:
           type: string
+          example: X:1000000..1000100:1
         example: X:1000000..1000100:1
       - name: asm_two
         in: path
@@ -2775,6 +2984,7 @@ paths:
         description: Version of the output assembly
         schema:
           type: string
+          example: GRCh38
         example: GRCh38
       - name: coord_system
         in: query
@@ -2797,6 +3007,20 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                mappings:
+                - original:
+                    seq_region_name: X
+                    coord_system: chromosome
+                    start: 1000000
+                    end: 1000100
+                    strand: 1
+                  mapped:
+                    seq_region_name: X
+                    coord_system: chromosome
+                    start: 1039365
+                    end: 1039465
+                    strand: 1
             text/xml:
               schema:
                 type: object
@@ -2816,6 +3040,7 @@ paths:
         description: An Ensembl transcript stable ID
         schema:
           type: string
+          example: ENST00000288602
         example: ENST00000288602
       - name: region
         in: path
@@ -2823,6 +3048,7 @@ paths:
         description: Query region in cDNA coordinates
         schema:
           type: string
+          example: 100..300
         example: 100..300
       - name: species
         in: query
@@ -2850,6 +3076,13 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                mappings:
+                - start: 140719328
+                  end: 140719528
+                  seq_region_name: '7'
+                  rank: 1
+                  strand: -1
             text/xml:
               schema:
                 type: object
@@ -2869,6 +3102,7 @@ paths:
         description: An Ensembl transcript stable ID
         schema:
           type: string
+          example: ENST00000288602
         example: ENST00000288602
       - name: region
         in: path
@@ -2876,6 +3110,7 @@ paths:
         description: Query region in CDS coordinates
         schema:
           type: string
+          example: 1..100
         example: 1..100
       - name: species
         in: query
@@ -2903,6 +3138,11 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                mappings:
+                - start: 140719328
+                  end: 140719428
+                  seq_region_name: '7'
             text/xml:
               schema:
                 type: object
@@ -2922,6 +3162,7 @@ paths:
         description: An Ensembl translation stable ID
         schema:
           type: string
+          example: ENSP00000288602
         example: ENSP00000288602
       - name: region
         in: path
@@ -2929,6 +3170,7 @@ paths:
         description: Query region in protein coordinates
         schema:
           type: string
+          example: 100..300
         example: 100..300
       - name: species
         in: query
@@ -2944,6 +3186,11 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                mappings:
+                - start: 140719028
+                  end: 140719628
+                  seq_region_name: '7'
             text/xml:
               schema:
                 type: object
@@ -2963,6 +3210,7 @@ paths:
         description: An ontology term identifier
         schema:
           type: string
+          example: GO:0005667
         example: GO:0005667
       - name: relation
         in: query
@@ -2990,6 +3238,11 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                accession: GO:0005667
+                name: transcription factor complex
+                namespace: cellular_component
+                definition: A protein complex that is capable of associating with DNA...
             text/xml:
               schema:
                 type: object
@@ -3009,6 +3262,7 @@ paths:
         description: An ontology name. SQL wildcards are supported
         schema:
           type: string
+          example: transcription factor complex
         example: transcription factor complex
       - name: ontology
         in: query
@@ -3045,6 +3299,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - accession: GO:0005667
+                  name: transcription factor complex
+                  namespace: cellular_component
             text/xml:
               schema:
                 type: object
@@ -3064,6 +3323,7 @@ paths:
         description: An ontology term identifier
         schema:
           type: string
+          example: GO:0005667
         example: GO:0005667
       - name: ontology
         in: query
@@ -3083,6 +3343,12 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - accession: GO:0032991
+                  name: protein-containing complex
+                - accession: GO:0005575
+                  name: cellular_component
             text/xml:
               schema:
                 type: object
@@ -3102,6 +3368,7 @@ paths:
         description: An ontology term identifier
         schema:
           type: string
+          example: GO:0005667
         example: GO:0005667
       - name: ontology
         in: query
@@ -3148,6 +3415,10 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - accession: GO:0090575
+                  name: RNA polymerase II transcription factor complex
             text/xml:
               schema:
                 type: object
@@ -3201,6 +3472,7 @@ paths:
         description: A taxon identifier. Can be a NCBI taxon id or a name
         schema:
           type: string
+          example: '9606'
         example: '9606'
       - name: simple
         in: query
@@ -3223,6 +3495,13 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                id: '9606'
+                scientific_name: Homo sapiens
+                name: human
+                parent:
+                  id: '9605'
+                  name: Homo
             text/xml:
               schema:
                 type: object
@@ -3242,6 +3521,7 @@ paths:
         description: A taxon identifier. Can be a NCBI taxon id or a name
         schema:
           type: string
+          example: '9606'
         example: '9606'
       responses:
         '200':
@@ -3256,6 +3536,14 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: '9606'
+                  scientific_name: Homo sapiens
+                - id: '9605'
+                  scientific_name: Homo
+                - id: '9604'
+                  scientific_name: Hominidae
             text/xml:
               schema:
                 type: object
@@ -3275,6 +3563,7 @@ paths:
         description: A non-scientific species name. Can include SQL wildcards
         schema:
           type: string
+          example: human
         example: human
       responses:
         '200':
@@ -3289,6 +3578,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - id: '9606'
+                  scientific_name: Homo sapiens
+                  name: human
             text/xml:
               schema:
                 type: object
@@ -3308,6 +3602,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: id
         in: path
@@ -3315,6 +3610,7 @@ paths:
         description: An Ensembl stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       - name: compara
         in: query
@@ -3393,6 +3689,15 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                data:
+                - id: ENSG00000157764
+                  homologies:
+                  - type: ortholog_one2one
+                    id: ENSMUSG00000002413
+                    species: mus_musculus
+                    protein_id: ENSMUSP00000002482
+                    perc_id: 90.5
             text/xml:
               schema:
                 type: object
@@ -3417,6 +3722,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: symbol
         in: path
@@ -3424,6 +3730,7 @@ paths:
         description: Symbol or display name of a gene
         schema:
           type: string
+          example: BRCA2
         example: BRCA2
       - name: compara
         in: query
@@ -3507,6 +3814,12 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                data:
+                - id: ENSG00000139618
+                  homologies:
+                  - type: ortholog_one2one
+                    id: ENSMUSG00000041147
             text/xml:
               schema:
                 type: object
@@ -3531,6 +3844,7 @@ paths:
         description: An Ensembl genetree ID
         schema:
           type: string
+          example: ENSGT00390000003602
         example: ENSGT00390000003602
       - name: compara
         in: query
@@ -3630,6 +3944,11 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                tree:
+                  id: ENSGT00390000003602
+                  rooted: 1
+                  type: gene_tree
   /genetree/member/id/species/{species}/id/{id}:
     get:
       tags:
@@ -3644,6 +3963,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: id
         in: path
@@ -3651,6 +3971,7 @@ paths:
         description: An Ensembl stable ID
         schema:
           type: string
+          example: ENSG00000157764
         example: ENSG00000157764
       - name: db_type
         in: query
@@ -3760,6 +4081,10 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                tree:
+                  id: ENSGT00390000003602
+                  rooted: 1
   /genetree/member/symbol/species/{species}/symbol/{symbol}:
     get:
       tags:
@@ -3910,6 +4235,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: region
         in: path
@@ -3917,6 +4243,7 @@ paths:
         description: Query region (maximum 10Mb)
         schema:
           type: string
+          example: X:1000000..1000100:1
         example: X:1000000..1000100:1
       - name: compara
         in: query
@@ -4001,6 +4328,11 @@ paths:
                     items:
                       type: object
                 additionalProperties: true
+              example:
+                items:
+                - alignments:
+                  - species: homo_sapiens
+                    seq: ATGCATGC...
             text/xml:
               schema:
                 type: object
@@ -4179,6 +4511,7 @@ paths:
         description: Species name/alias
         schema:
           type: string
+          example: homo_sapiens
         example: homo_sapiens
       - name: binding_matrix_stable_id
         in: path
@@ -4186,6 +4519,7 @@ paths:
         description: Stable ID of binding matrix
         schema:
           type: string
+          example: ENSPFM0001
         example: ENSPFM0001
       - name: unit
         in: query
@@ -4206,6 +4540,17 @@ paths:
                 type: object
                 properties: {}
                 additionalProperties: true
+              example:
+                stable_id: ENSPFM0001
+                matrix:
+                - - 0.1
+                  - 0.2
+                  - 0.3
+                  - 0.4
+                - - 0.2
+                  - 0.3
+                  - 0.2
+                  - 0.3
             text/xml:
               schema:
                 type: object
