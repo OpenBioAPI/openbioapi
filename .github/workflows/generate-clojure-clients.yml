@@ -9,9 +9,9 @@ on:
   #   - cron: '0 0 * * *'  # Daily at midnight UTC
 
 env:
-  TARGET_OWNER: ${{ vars.TARGET_OWNER || 'Schmoho' }}
+  TARGET_OWNER: ${{ vars.TARGET_OWNER || 'OpenBioAPI' }}
   META_REPO: ${{ vars.META_REPO || 'openbioapi-clients-meta' }}
-  PRIVATE_CLIENTS: ${{ vars.PRIVATE_CLIENTS || 'false' }}
+  PRIVATE_CLIENTS: ${{ vars.PRIVATE_CLIENTS || 'true' }}
 
 jobs:
   generate-clients:
