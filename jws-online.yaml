@@ -1,0 +1,259 @@
+openapi: 3.1.0
+info:
+  title: JWS Metabolic Modelling Platform REST API
+  version: "1.0.0"
+  description: |
+    OpenAPI description for the JWS Online REST API, based on the public
+    documentation at https://jws-docs.readthedocs.io/8_rest.html.
+
+    Notes:
+    - Paths are all prefixed by `/rest/` on the server.
+    - Many endpoints return HTML via an API viewer by default, with JSON available
+      using the `format=json` query parameter on search/list endpoints.
+    - Response schemas are approximate / generic because the documentation does
+      not specify exact payload structure.
+
+servers:
+  - url: "https://jjj.bio.vu.nl/rest"
+    description: JWS Online REST API
+
+tags:
+  - name: Models
+  - name: Simulations
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    FormatQuery:
+      name: format
+      in: query
+      required: false
+      description: |
+        Optional response format. Use `json` to force JSON instead of the default
+        API viewer HTML where applicable.
+      schema:
+        type: string
+        enum: [json]
+
+    SearchQuery:
+      name: search
+      in: query
+      required: false
+      description: Generic search term.
+      schema:
+        type: string
+
+    ModelSlug:
+      name: modelSlug
+      in: path
+      required: true
+      description: Slug/identifier of the model.
+      schema:
+        type: string
+
+    ExperimentSlug:
+      name: experimentSlug
+      in: path
+      required: true
+      description: Slug/identifier of the simulation experiment.
+      schema:
+        type: string
+
+
+  schemas:
+    ModelSummary:
+      type: object
+      additionalProperties: true
+      description: Summary of a model in the JWS database.
+
+    ModelDetail:
+      type: object
+      additionalProperties: true
+      description: Detailed representation of a single model.
+
+    ManuscriptInfo:
+      type: object
+      additionalProperties: true
+      description: Manuscript metadata attached to a curated model or experiment.
+
+    ExperimentSummary:
+      type: object
+      additionalProperties: true
+      description: Summary of a simulation experiment.
+
+    ExperimentDetail:
+      type: object
+      additionalProperties: true
+      description: Detailed representation of a simulation experiment.
+
+paths:
+
+  /models/:
+    get:
+      tags: [Models]
+      summary: List all models
+      description: Retrieve a list of all models available in JWS Online.
+      parameters:
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: List of models.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelSummary'
+
+  /models/species/:
+    get:
+      tags: [Models]
+      summary: Search models by species ID
+      description: Returns models that include a given species ID.
+      parameters:
+        - name: search
+          in: query
+          required: true
+          description: Species ID to search for.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: List of matching models.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelSummary'
+
+  /models/reactions/:
+    get:
+      tags: [Models]
+      summary: Search models by reaction ID
+      description: Returns models that include a given reaction ID.
+      parameters:
+        - name: search
+          in: query
+          required: true
+          description: Reaction ID to search for.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: List of matching models.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelSummary'
+
+  /models/{modelSlug}/:
+    get:
+      tags: [Models]
+      summary: Get model details
+      description: Retrieves details about a specified model.
+      parameters:
+        - $ref: '#/components/parameters/ModelSlug'
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: Model details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelDetail'
+
+  /models/{modelSlug}/manuscript/:
+    get:
+      tags: [Models]
+      summary: Get manuscript information for a model
+      description: |
+        Retrieves manuscript details attached to this model (only for curated models).
+      parameters:
+        - $ref: '#/components/parameters/ModelSlug'
+      responses:
+        '200':
+          description: Manuscript metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManuscriptInfo'
+
+  /models/{modelSlug}/experiments/:
+    get:
+      tags: [Models, Simulations]
+      summary: List simulations using a model
+      description: Retrieves a list of simulation experiments that use the specified model.
+      parameters:
+        - $ref: '#/components/parameters/ModelSlug'
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: List of simulation experiments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExperimentSummary'
+
+  /experiments/:
+    get:
+      tags: [Simulations]
+      summary: List and filter simulations
+      description: |
+        Lists all simulation experiments. If `search` is provided, filters the
+        simulations by the given query.
+      parameters:
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: List of simulation experiments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExperimentSummary'
+
+  /experiments/{experimentSlug}/:
+    get:
+      tags: [Simulations]
+      summary: Get simulation experiment details
+      description: Retrieves details about a specified simulation experiment.
+      parameters:
+        - $ref: '#/components/parameters/ExperimentSlug'
+        - $ref: '#/components/parameters/FormatQuery'
+      responses:
+        '200':
+          description: Experiment details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentDetail'
+
+  /experiments/{experimentSlug}/manuscript/:
+    get:
+      tags: [Simulations]
+      summary: Get manuscript information for a simulation
+      description: |
+        Retrieves manuscript details attached to this simulation experiment
+        (only for curated simulations).
+      parameters:
+        - $ref: '#/components/parameters/ExperimentSlug'
+      responses:
+        '200':
+          description: Manuscript metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManuscriptInfo'
