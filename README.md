@@ -1,7 +1,9 @@
 # OpenBioAPI
 
-This is a collection of OpenAPI specifications for Bioinformatics Databases. Specs so far are either provided by the creators of the resource, or produced using LLMs fed with available API documentations.
-The goal is to provide a resource for auto-generation of API clients, memoizing proxy servers for development and testing purposes.
+This is a collection of OpenAPI specifications for Bioinformatics Databases. 
+
+Specs so far are either provided by the creators of the resource, or produced using LLMs fed with available API documentation pages.
+The goal is to provide a resource for auto-generation of API clients, as well as memoizing proxy servers for development and testing purposes.
 Currently, an experimental workflow for the automatic generation of Clojure clients is available and the generated clients can be found in the associated GitHub organization.
 
 The [IBM OpenAPI Validator](https://github.com/IBM/openapi-validator) has been used with the flags `--summary-only` and `--impact-score` using default configuration.
