@@ -31,7 +31,8 @@ The [IBM OpenAPI Validator](https://github.com/IBM/openapi-validator) has been u
 
 ## Next Goals
 
-- automate IBM validator runs
+- automate IBM validator runs and versioning of results
+- automate periodic re-acquisition/update of specs that are provided by the creators
 - add specs for the [Global Core Bioinformatics Resources](https://globalbiodata.org/what-we-do/global-core-biodata-resources/list-of-current-global-core-biodata-resources/)
 - add Ensembl spec
 - add BiGG spec
