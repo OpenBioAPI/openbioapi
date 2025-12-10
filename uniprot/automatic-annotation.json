@@ -355,14 +355,14 @@
           "proteinDescription" : {
             "$ref" : "#/components/schemas/ProteinDescription"
           },
+          "keyword" : {
+            "$ref" : "#/components/schemas/Keyword"
+          },
           "gene" : {
             "$ref" : "#/components/schemas/Gene"
           },
           "dbReference" : {
             "$ref" : "#/components/schemas/UniProtKBCrossReference"
-          },
-          "keyword" : {
-            "$ref" : "#/components/schemas/Keyword"
           },
           "annotationType" : {
             "type" : "string",
@@ -652,12 +652,6 @@
               "type" : "string"
             }
           },
-          "uniProtAccessions" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
           "oldRuleNum" : {
             "type" : "string"
           },
@@ -687,6 +681,12 @@
             }
           },
           "names" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "uniProtAccessions" : {
             "type" : "array",
             "items" : {
               "type" : "string"
@@ -854,14 +854,14 @@
           "type" : {
             "type" : "string"
           },
-          "ligandPart" : {
-            "$ref" : "#/components/schemas/LigandPart"
-          },
           "inGroup" : {
             "type" : "boolean"
           },
           "ligand" : {
             "$ref" : "#/components/schemas/Ligand"
+          },
+          "ligandPart" : {
+            "$ref" : "#/components/schemas/LigandPart"
           },
           "pattern" : {
             "type" : "string"
@@ -892,10 +892,10 @@
       "ProteinDescription" : {
         "type" : "object",
         "properties" : {
-          "alternativeNames" : {
+          "submissionNames" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/ProteinName"
+              "$ref" : "#/components/schemas/ProteinSubName"
             }
           },
           "recommendedName" : {
@@ -919,10 +919,10 @@
               "$ref" : "#/components/schemas/Name"
             }
           },
-          "submissionNames" : {
+          "alternativeNames" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/ProteinSubName"
+              "$ref" : "#/components/schemas/ProteinName"
             }
           },
           "includes" : {
@@ -968,12 +968,6 @@
       "ProteinSection" : {
         "type" : "object",
         "properties" : {
-          "alternativeNames" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/ProteinName"
-            }
-          },
           "recommendedName" : {
             "$ref" : "#/components/schemas/ProteinName"
           },
@@ -993,6 +987,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/Name"
+            }
+          },
+          "alternativeNames" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProteinName"
             }
           }
         }
@@ -1100,12 +1100,12 @@
       "SamTrigger" : {
         "type" : "object",
         "properties" : {
+          "expectedHits" : {
+            "$ref" : "#/components/schemas/Range"
+          },
           "samTriggerType" : {
             "type" : "string",
             "enum" : [ "transmembrane", "signal", "coiledCoil" ]
-          },
-          "expectedHits" : {
-            "$ref" : "#/components/schemas/Range"
           }
         }
       },
@@ -1148,6 +1148,12 @@
           "category" : {
             "type" : "string",
             "enum" : [ "Sequence databases", "3D structure databases", "Protein-protein interaction databases", "Chemistry", "Protein family/group databases", "PTM databases", "Genetic variation databases", "2D gel databases", "Proteomic databases", "Protocols and materials databases", "Genome annotation databases", "Organism-specific databases", "Phylogenomic databases", "Enzyme and pathway databases", "Miscellaneous", "Gene expression databases", "Family and domain databases", "Ontologies", "Proteomes databases", "Unknown" ]
+          },
+          "uniProtDataTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           },
           "uriLink" : {
             "type" : "string"
@@ -1201,13 +1207,19 @@
       "UniRuleEntry" : {
         "type" : "object",
         "properties" : {
-          "statistics" : {
-            "$ref" : "#/components/schemas/Statistics"
-          },
           "uniRuleId" : {
             "type" : "string"
           },
-          "modifiedDate" : {
+          "statistics" : {
+            "$ref" : "#/components/schemas/Statistics"
+          },
+          "positionFeatureSets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PositionFeatureSet"
+            }
+          },
+          "createdDate" : {
             "type" : "string",
             "format" : "date"
           },
@@ -1229,15 +1241,9 @@
               "$ref" : "#/components/schemas/SamFeatureSet"
             }
           },
-          "createdDate" : {
+          "modifiedDate" : {
             "type" : "string",
             "format" : "date"
-          },
-          "positionFeatureSets" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/PositionFeatureSet"
-            }
           }
         }
       },
@@ -1445,14 +1451,14 @@
           "diseaseAccession" : {
             "type" : "string"
           },
+          "diseaseCrossReference" : {
+            "$ref" : "#/components/schemas/CrossReferenceDiseaseDatabase"
+          },
           "diseaseId" : {
             "type" : "string"
           },
           "acronym" : {
             "type" : "string"
-          },
-          "diseaseCrossReference" : {
-            "$ref" : "#/components/schemas/CrossReferenceDiseaseDatabase"
           },
           "description" : {
             "type" : "string"
@@ -1600,14 +1606,14 @@
       "CatalyticActivityComment" : {
         "type" : "object",
         "properties" : {
-          "reaction" : {
-            "$ref" : "#/components/schemas/Reaction"
-          },
           "physiologicalReactions" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/PhysiologicalReaction"
             }
+          },
+          "reaction" : {
+            "$ref" : "#/components/schemas/Reaction"
           },
           "molecule" : {
             "type" : "string"
@@ -1660,12 +1666,12 @@
       "PhysiologicalReaction" : {
         "type" : "object",
         "properties" : {
-          "reactionCrossReference" : {
-            "$ref" : "#/components/schemas/CrossReferenceReactionDatabase"
-          },
           "directionType" : {
             "type" : "string",
             "enum" : [ "left-to-right", "right-to-left" ]
+          },
+          "reactionCrossReference" : {
+            "$ref" : "#/components/schemas/CrossReferenceReactionDatabase"
           },
           "evidences" : {
             "type" : "array",
@@ -1695,11 +1701,11 @@
           "note" : {
             "type" : "string"
           },
-          "ftp" : {
-            "type" : "boolean"
-          },
           "resourceUrl" : {
             "type" : "string"
+          },
+          "ftp" : {
+            "type" : "boolean"
           },
           "resourceName" : {
             "type" : "string"
@@ -1778,18 +1784,18 @@
       "Interaction" : {
         "type" : "object",
         "properties" : {
+          "interactantOne" : {
+            "$ref" : "#/components/schemas/Interactant"
+          },
           "numberOfExperiments" : {
             "type" : "integer",
             "format" : "int32"
           },
-          "organismDiffer" : {
-            "type" : "boolean"
-          },
-          "interactantOne" : {
-            "$ref" : "#/components/schemas/Interactant"
-          },
           "interactantTwo" : {
             "$ref" : "#/components/schemas/Interactant"
+          },
+          "organismDiffer" : {
+            "type" : "boolean"
           }
         }
       },
@@ -1820,11 +1826,11 @@
           "temperatureDependence" : {
             "$ref" : "#/components/schemas/TemperatureDependence"
           },
-          "absorption" : {
-            "$ref" : "#/components/schemas/Absorption"
-          },
           "phDependence" : {
             "$ref" : "#/components/schemas/PhDependence"
+          },
+          "absorption" : {
+            "$ref" : "#/components/schemas/Absorption"
           },
           "redoxPotential" : {
             "$ref" : "#/components/schemas/RedoxPotential"
@@ -1840,14 +1846,14 @@
           "name" : {
             "type" : "string"
           },
+          "ecNumber" : {
+            "type" : "string"
+          },
           "reactionCrossReferences" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/CrossReferenceReactionDatabase"
             }
-          },
-          "ecNumber" : {
-            "type" : "string"
           },
           "evidences" : {
             "type" : "array",
@@ -1880,6 +1886,10 @@
           "name" : {
             "$ref" : "#/components/schemas/IsoformName"
           },
+          "isoformSequenceStatus" : {
+            "type" : "string",
+            "enum" : [ "Displayed", "External", "Not described", "Described" ]
+          },
           "isoformIds" : {
             "type" : "array",
             "items" : {
@@ -1900,10 +1910,6 @@
             "items" : {
               "$ref" : "#/components/schemas/IsoformName"
             }
-          },
-          "isoformSequenceStatus" : {
-            "type" : "string",
-            "enum" : [ "Displayed", "External", "Not described", "Described" ]
           }
         }
       },
@@ -1969,11 +1975,11 @@
           "note" : {
             "type" : "string"
           },
-          "molWeight" : {
+          "molWeightError" : {
             "type" : "number",
             "format" : "float"
           },
-          "molWeightError" : {
+          "molWeight" : {
             "type" : "number",
             "format" : "float"
           },
