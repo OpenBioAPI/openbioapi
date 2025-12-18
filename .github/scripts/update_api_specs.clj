@@ -1,3 +1,5 @@
+#!/usr/bin/env bb 
+
 (ns openbioapi.update-api-specs
   (:require [babashka.curl :as curl]
             [clojure.java.io :as io]
