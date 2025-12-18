@@ -19,4 +19,4 @@ jobs:
       - name: Execute babashka script
         uses: tzafrirben/babashka-docker-action@v1.1
         with:
-          bb_src: ../scripts/update_api_specs.clj
+          bb_src: .github/scripts/update_api_specs.clj
