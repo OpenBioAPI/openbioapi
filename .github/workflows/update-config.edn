@@ -1,0 +1,61 @@
+#:openbioapi.update-config
+{:specs [#:openbioapi.spec
+         {:id       :biomodels
+          :url      "https://www.ebi.ac.uk/biomodels/docs/biomodels-jummp-swagger.json"
+          :file     "../../biomodels.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :biosimulations
+          :url      "https://api.biosimulations.org/openapi.json"
+          :file     "../../biosimulations.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :biosimulators
+          :url      "https://api.biosimulators.org/openapi.json"
+          :file     "../../biosimulators.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :go-api
+          :url      "https://api.geneontology.org/openapi.json"
+          :file     "../../geneontology.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :ncbi
+          :url      "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/openapi3/openapi3.docs.yaml"
+          :file     "../../ncbi.yaml"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :uniparc
+          :url      "https://rest.uniprot.org/uniparc/api/docs"
+          :file     "../../uniprot/uniparc.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :automatic-annotation
+          :url      "https://rest.uniprot.org/aa/api/docs"
+          :file     "../../uniprot/automatic-annotation.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :uniprotkb
+          :url      "https://rest.uniprot.org/uniprotkb/api/docs"
+          :file     "../../uniprot/uniprot.json"
+          :active   true}
+         ;; #:openbioapi.spec
+         ;; {:id       :idmapping
+         ;;  :url      "https://rest.uniprot.org/idmapping/api/docs"
+         ;;  :file     "../../uniprot/id-mapping.json"
+         ;;  :active   true}
+         #:openbioapi.spec
+         {:id       :ṕroteomes
+          :url      "https://rest.uniprot.org/proteomes/api/docs"
+          :file     "../../uniprot/proteomes.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :supporting-data
+          :url      "https://rest.uniprot.org/support-data/api/docs"
+          :file     "../../uniprot/supporting-data.json"
+          :active   true}
+         #:openbioapi.spec
+         {:id       :uniref
+          :url      "https://rest.uniprot.org/uniref/api/docs"
+          :file     "../../uniprot/uniref.json"
+          :active   true}]}

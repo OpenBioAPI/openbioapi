@@ -12,13 +12,13 @@
     "name" : "GeneCentric",
     "description" : "GeneCentric services of a proteome, where the set of genes and their products are grouped under a single canonical gene identifier"
   }, {
-    "name" : "Proteome",
+    "name" : "Proteomes",
     "description" : "The proteomes service offers access to UniProtKB proteomes, allowing users to search for proteomes (including reference or redundant proteomes) using UniProt proteome identifiers, species names, or taxonomy identifiers"
   } ],
   "paths" : {
     "/proteomes/{upid}" : {
       "get" : {
-        "tags" : [ "Proteome" ],
+        "tags" : [ "Proteomes" ],
         "summary" : "Get proteome entry by a single upid.",
         "description" : "Search Proteome entry by Proteome ID(upid) to return all data associated with that entry. Specify <tt>fields</tt> to return only data for specific sections of that entry that are of interest to you",
         "operationId" : "getByUpId",
@@ -58,7 +58,8 @@
               },
               "text/plain;format=tsv" : { },
               "text/plain;format=list" : { },
-              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : { }
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : { },
+              "application/rdf+xml" : { }
             }
           }
         }
@@ -66,7 +67,7 @@
     },
     "/proteomes/stream" : {
       "get" : {
-        "tags" : [ "Proteome" ],
+        "tags" : [ "Proteomes" ],
         "summary" : "Download proteome entries retrieved by a search query.",
         "description" : "The stream endpoint uses a request query to return all entries associated with the search term in a single download. Specify <tt>fields</tt> to return only data for specific sections of that entry that are of interest to you",
         "operationId" : "stream",
@@ -126,7 +127,8 @@
               },
               "text/plain;format=tsv" : { },
               "text/plain;format=list" : { },
-              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : { }
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : { },
+              "application/rdf+xml" : { }
             }
           }
         }
@@ -134,7 +136,7 @@
     },
     "/proteomes/search" : {
       "get" : {
-        "tags" : [ "Proteome" ],
+        "tags" : [ "Proteomes" ],
         "summary" : "Retrieve proteome entries by a search query.",
         "description" : "The search endpoint uses a request query to return all entries associated with the search term in a paginated list of entries. Use ‘size’ to specify the number of entries per page of results. Specify <tt>fields</tt> to return only data for specific sections of that entry that are of interest to you",
         "operationId" : "search",
@@ -462,7 +464,7 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "missing" : {
+          "fragmented" : {
             "type" : "integer",
             "format" : "int32"
           },
@@ -470,20 +472,20 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "complete" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "fragmented" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
           "completeSingle" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "missing" : {
             "type" : "integer",
             "format" : "int32"
           },
           "lineageDb" : {
             "type" : "string"
+          },
+          "complete" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "score" : {
             "type" : "integer",
@@ -494,6 +496,10 @@
       "CPDReport" : {
         "type" : "object",
         "properties" : {
+          "proteomeCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "stdCdss" : {
             "type" : "number",
             "format" : "double"
@@ -503,10 +509,6 @@
             "format" : "int32"
           },
           "confidence" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "proteomeCount" : {
             "type" : "integer",
             "format" : "int32"
           },
@@ -522,11 +524,12 @@
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
+          },
+          "citationType" : {
+            "type" : "string",
+            "enum" : [ "journal article", "book", "online journal article", "patent", "submission", "thesis", "UniProt indexed literatures", "unpublished observations" ]
           },
           "authoringGroups" : {
             "type" : "array",
@@ -540,12 +543,11 @@
               "type" : "string"
             }
           },
-          "citationType" : {
-            "type" : "string",
-            "enum" : [ "journal article", "book", "online journal article", "patent", "submission", "thesis", "UniProt indexed literatures", "unpublished observations" ]
-          },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -685,6 +687,9 @@
           "id" : {
             "type" : "string"
           },
+          "proteomeStatistics" : {
+            "$ref" : "#/components/schemas/ProteomeStatistics"
+          },
           "redudantProteomes" : {
             "type" : "array",
             "items" : {
@@ -703,20 +708,6 @@
               "type" : "string",
               "enum" : [ "genome length too large", "partial", "missing tRNA genes", "untrustworthy as type", "many frameshifted proteins", "missing rRNA genes", "genome length too small", "low gene count", "unverified source organism", "derived from environmental source", "low contig N50", "low quality sequence", "high contig L50", "contaminated", "mixed culture", "misassembled", "derived from metagenome", "derived from single cell", "missing ribosomal protein genes", "validation errors", "abnormal gene to sequence ratio", "metagenome", "hybrid", "chimeric", "derived from surveillance project", "fragmented assembly", "RefSeq annotation failed", "derived from large-scale project", "from large multi-isolate project", "genus undefined", "missing strain identifier", "not used as type", "unverified host organism", "superseded by newer assembly for species", "incomplete metagenome", "incomplete metagenome-assembled genome", "low quality proteome", "proteome in uniparc", "over-represented proteome", "sequence duplications", "delayed for further analysis" ]
             }
-          },
-          "proteomeStatistics" : {
-            "$ref" : "#/components/schemas/ProteomeStatistics"
-          },
-          "panproteome" : {
-            "type" : "string"
-          },
-          "annotationScore" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "superkingdom" : {
-            "type" : "string",
-            "enum" : [ "archaea", "viruses", "bacteria", "eukaryota" ]
           },
           "taxonomy" : {
             "$ref" : "#/components/schemas/Taxonomy"
@@ -743,6 +734,17 @@
             "items" : {
               "$ref" : "#/components/schemas/Citation"
             }
+          },
+          "panproteome" : {
+            "type" : "string"
+          },
+          "annotationScore" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "superkingdom" : {
+            "type" : "string",
+            "enum" : [ "archaea", "viruses", "bacteria", "eukaryota" ]
           },
           "proteinCount" : {
             "type" : "integer",
@@ -811,9 +813,6 @@
             "type" : "integer",
             "format" : "int64"
           },
-          "commonName" : {
-            "type" : "string"
-          },
           "scientificName" : {
             "type" : "string"
           },
@@ -822,6 +821,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "commonName" : {
+            "type" : "string"
           }
         }
       },
@@ -833,14 +835,11 @@
           },
           "rank" : {
             "type" : "string",
-            "enum" : [ "strain", "serotype", "series", "morph", "biotype", "clade", "genotype", "isolate", "forma specialis", "pathogroup", "serogroup", "section", "subsection", "forma", "varietas", "subspecies", "species", "species subgroup", "species group", "subgenus", "genus", "subtribe", "tribe", "subfamily", "family", "superfamily", "parvorder", "infraorder", "suborder", "order", "superorder", "subcohort", "cohort", "infraclass", "subclass", "class", "superclass", "subphylum", "phylum", "superphylum", "subkingdom", "kingdom", "superkingdom", "no rank" ]
+            "enum" : [ "strain", "serotype", "series", "morph", "biotype", "clade", "genotype", "isolate", "forma specialis", "pathogroup", "serogroup", "section", "subsection", "forma", "varietas", "subspecies", "species", "species subgroup", "species group", "subgenus", "genus", "subtribe", "tribe", "subfamily", "family", "superfamily", "parvorder", "infraorder", "suborder", "order", "superorder", "subcohort", "cohort", "infraclass", "subclass", "class", "superclass", "subphylum", "phylum", "superphylum", "subkingdom", "kingdom", "superkingdom", "realm", "domain", "subvariety", "acellular root", "cellular root", "no rank" ]
           },
           "taxonId" : {
             "type" : "integer",
             "format" : "int64"
-          },
-          "commonName" : {
-            "type" : "string"
           },
           "scientificName" : {
             "type" : "string"
@@ -850,6 +849,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "commonName" : {
+            "type" : "string"
           }
         }
       },
@@ -1339,11 +1341,11 @@
           "name" : {
             "type" : "string"
           },
-          "evidenceDatabaseDetail" : {
-            "$ref" : "#/components/schemas/EvidenceDatabaseDetail"
-          },
           "reference" : {
             "type" : "boolean"
+          },
+          "evidenceDatabaseDetail" : {
+            "$ref" : "#/components/schemas/EvidenceDatabaseDetail"
           }
         }
       },
@@ -1368,14 +1370,14 @@
       "GeneCentricEntry" : {
         "type" : "object",
         "properties" : {
-          "proteomeId" : {
-            "type" : "string"
-          },
           "relatedProteins" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/Protein"
             }
+          },
+          "proteomeId" : {
+            "type" : "string"
           },
           "canonicalProtein" : {
             "$ref" : "#/components/schemas/Protein"
@@ -1395,9 +1397,6 @@
               "type" : "string"
             }
           },
-          "commonName" : {
-            "type" : "string"
-          },
           "scientificName" : {
             "type" : "string"
           },
@@ -1406,6 +1405,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "commonName" : {
+            "type" : "string"
           },
           "evidences" : {
             "type" : "array",
@@ -1418,9 +1420,9 @@
       "Protein" : {
         "type" : "object",
         "properties" : {
-          "proteinExistence" : {
-            "type" : "string",
-            "enum" : [ "1: Evidence at protein level", "2: Evidence at transcript level", "3: Inferred from homology", "4: Predicted", "5: Uncertain", "UNKNOWN" ]
+          "sequenceVersion" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "entryType" : {
             "type" : "string",
@@ -1442,9 +1444,9 @@
             "type" : "string",
             "enum" : [ "Precursor", "Fragment", "Fragments", "Fragment,Precursor", "Fragments,Precursor" ]
           },
-          "sequenceVersion" : {
-            "type" : "integer",
-            "format" : "int32"
+          "proteinExistence" : {
+            "type" : "string",
+            "enum" : [ "1: Evidence at protein level", "2: Evidence at transcript level", "3: Inferred from homology", "4: Predicted", "5: Uncertain", "UNKNOWN" ]
           },
           "sequenceRange" : {
             "type" : "string"
@@ -1488,12 +1490,15 @@
           "completeAuthorList" : {
             "type" : "boolean"
           },
-          "doiId" : {
-            "type" : "string"
-          },
           "pubmedId" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "doiId" : {
+            "type" : "string"
+          },
+          "journal" : {
+            "type" : "string"
           },
           "firstPage" : {
             "type" : "string"
@@ -1504,17 +1509,11 @@
           "volume" : {
             "type" : "string"
           },
-          "journal" : {
-            "type" : "string"
-          },
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1528,8 +1527,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -1546,11 +1548,8 @@
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1564,8 +1563,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -1584,11 +1586,8 @@
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1602,8 +1601,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -1622,11 +1624,8 @@
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1640,8 +1639,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -1654,16 +1656,10 @@
           "address" : {
             "type" : "string"
           },
-          "bookName" : {
+          "firstPage" : {
             "type" : "string"
           },
-          "editors" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "firstPage" : {
+          "bookName" : {
             "type" : "string"
           },
           "lastPage" : {
@@ -1675,14 +1671,17 @@
           "publisher" : {
             "type" : "string"
           },
+          "editors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1696,8 +1695,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -1713,11 +1715,8 @@
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1731,8 +1730,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"
@@ -1742,6 +1744,9 @@
       "JournalArticle" : {
         "type" : "object",
         "properties" : {
+          "journal" : {
+            "type" : "string"
+          },
           "firstPage" : {
             "type" : "string"
           },
@@ -1751,17 +1756,11 @@
           "volume" : {
             "type" : "string"
           },
-          "journal" : {
-            "type" : "string"
-          },
           "id" : {
             "type" : "string"
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1775,8 +1774,11 @@
               "type" : "string"
             }
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "title" : {
             "type" : "string"

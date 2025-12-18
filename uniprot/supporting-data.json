@@ -1075,10 +1075,19 @@
           "active" : {
             "type" : "boolean"
           },
+          "statistics" : {
+            "$ref" : "#/components/schemas/TaxonomyStatistics"
+          },
           "links" : {
             "type" : "array",
             "items" : {
               "type" : "string"
+            }
+          },
+          "hosts" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Taxonomy"
             }
           },
           "rank" : {
@@ -1103,17 +1112,8 @@
               "$ref" : "#/components/schemas/TaxonomyStrain"
             }
           },
-          "hosts" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Taxonomy"
-            }
-          },
           "inactiveReason" : {
             "$ref" : "#/components/schemas/TaxonomyInactiveReason"
-          },
-          "statistics" : {
-            "$ref" : "#/components/schemas/TaxonomyStatistics"
           },
           "mnemonic" : {
             "type" : "string"
@@ -1180,11 +1180,11 @@
       "TaxonomyStatistics" : {
         "type" : "object",
         "properties" : {
-          "proteomeCount" : {
+          "referenceProteomeCount" : {
             "type" : "integer",
             "format" : "int64"
           },
-          "referenceProteomeCount" : {
+          "proteomeCount" : {
             "type" : "integer",
             "format" : "int64"
           },
@@ -1408,6 +1408,21 @@
           "content" : {
             "type" : "string"
           },
+          "statistics" : {
+            "$ref" : "#/components/schemas/Statistics"
+          },
+          "synonyms" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "geneOntologies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GoTerm"
+            }
+          },
           "note" : {
             "type" : "string"
           },
@@ -1429,18 +1444,6 @@
               "$ref" : "#/components/schemas/SubcellularLocationEntry"
             }
           },
-          "synonyms" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "geneOntologies" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/GoTerm"
-            }
-          },
           "references" : {
             "type" : "array",
             "items" : {
@@ -1453,9 +1456,6 @@
           },
           "keyword" : {
             "$ref" : "#/components/schemas/KeywordId"
-          },
-          "statistics" : {
-            "$ref" : "#/components/schemas/Statistics"
           }
         }
       },
@@ -1471,10 +1471,16 @@
               "$ref" : "#/components/schemas/KeywordEntry"
             }
           },
-          "links" : {
+          "statistics" : {
+            "$ref" : "#/components/schemas/Statistics"
+          },
+          "accession" : {
+            "type" : "string"
+          },
+          "parents" : {
             "type" : "array",
             "items" : {
-              "type" : "string"
+              "$ref" : "#/components/schemas/KeywordEntry"
             }
           },
           "synonyms" : {
@@ -1489,13 +1495,10 @@
               "$ref" : "#/components/schemas/GoTerm"
             }
           },
-          "accession" : {
-            "type" : "string"
-          },
-          "parents" : {
+          "links" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/KeywordEntry"
+              "type" : "string"
             }
           },
           "category" : {
@@ -1504,9 +1507,6 @@
           },
           "keyword" : {
             "$ref" : "#/components/schemas/KeywordId"
-          },
-          "statistics" : {
-            "$ref" : "#/components/schemas/Statistics"
           }
         }
       },
@@ -1539,6 +1539,9 @@
           "definition" : {
             "type" : "string"
           },
+          "statistics" : {
+            "$ref" : "#/components/schemas/Statistics"
+          },
           "acronym" : {
             "type" : "string"
           },
@@ -1548,20 +1551,17 @@
               "$ref" : "#/components/schemas/DiseaseCrossReference"
             }
           },
-          "keywords" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/KeywordId"
-            }
-          },
           "alternativeNames" : {
             "type" : "array",
             "items" : {
               "type" : "string"
             }
           },
-          "statistics" : {
-            "$ref" : "#/components/schemas/Statistics"
+          "keywords" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/KeywordId"
+            }
           }
         }
       },
@@ -1572,6 +1572,12 @@
             "type" : "string"
           },
           "id" : {
+            "type" : "string"
+          },
+          "statistics" : {
+            "$ref" : "#/components/schemas/Statistics"
+          },
+          "dbUrl" : {
             "type" : "string"
           },
           "abbrev" : {
@@ -1592,14 +1598,8 @@
               "type" : "string"
             }
           },
-          "dbUrl" : {
-            "type" : "string"
-          },
           "category" : {
             "type" : "string"
-          },
-          "statistics" : {
-            "$ref" : "#/components/schemas/Statistics"
           }
         }
       },
@@ -1609,8 +1609,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1628,11 +1631,8 @@
             "type" : "string",
             "enum" : [ "journal article", "book", "online journal article", "patent", "submission", "thesis", "UniProt indexed literatures", "unpublished observations" ]
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1675,11 +1675,11 @@
       "LiteratureEntry" : {
         "type" : "object",
         "properties" : {
-          "citation" : {
-            "$ref" : "#/components/schemas/Citation"
-          },
           "statistics" : {
             "$ref" : "#/components/schemas/LiteratureStatistics"
+          },
+          "citation" : {
+            "$ref" : "#/components/schemas/Citation"
           }
         }
       },
@@ -1721,17 +1721,20 @@
       "Literature" : {
         "type" : "object",
         "properties" : {
+          "pubmedId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "literatureAbstract" : {
             "type" : "string"
           },
           "completeAuthorList" : {
             "type" : "boolean"
           },
-          "pubmedId" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
           "doiId" : {
+            "type" : "string"
+          },
+          "volume" : {
             "type" : "string"
           },
           "firstPage" : {
@@ -1740,17 +1743,17 @@
           "lastPage" : {
             "type" : "string"
           },
-          "volume" : {
-            "type" : "string"
-          },
           "journal" : {
             "type" : "string"
           },
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1764,11 +1767,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1785,8 +1785,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1800,11 +1803,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1823,8 +1823,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1838,11 +1841,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1861,8 +1861,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1876,11 +1879,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1893,13 +1893,13 @@
           "address" : {
             "type" : "string"
           },
+          "volume" : {
+            "type" : "string"
+          },
           "firstPage" : {
             "type" : "string"
           },
           "lastPage" : {
-            "type" : "string"
-          },
-          "volume" : {
             "type" : "string"
           },
           "bookName" : {
@@ -1917,8 +1917,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1932,11 +1935,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1952,8 +1952,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -1967,11 +1970,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"
@@ -1981,13 +1981,13 @@
       "JournalArticle" : {
         "type" : "object",
         "properties" : {
+          "volume" : {
+            "type" : "string"
+          },
           "firstPage" : {
             "type" : "string"
           },
           "lastPage" : {
-            "type" : "string"
-          },
-          "volume" : {
             "type" : "string"
           },
           "journal" : {
@@ -1996,8 +1996,11 @@
           "id" : {
             "type" : "string"
           },
-          "publicationDate" : {
-            "type" : "string"
+          "citationCrossReferences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
+            }
           },
           "authoringGroups" : {
             "type" : "array",
@@ -2011,11 +2014,8 @@
               "type" : "string"
             }
           },
-          "citationCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/CrossReferenceCitationDatabase"
-            }
+          "publicationDate" : {
+            "type" : "string"
           },
           "title" : {
             "type" : "string"

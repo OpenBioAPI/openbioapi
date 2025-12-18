@@ -244,14 +244,14 @@
       "AlternativeSequence" : {
         "type" : "object",
         "properties" : {
-          "originalSequence" : {
-            "type" : "string"
-          },
           "alternativeSequences" : {
             "type" : "array",
             "items" : {
               "type" : "string"
             }
+          },
+          "originalSequence" : {
+            "type" : "string"
           }
         }
       },
@@ -261,8 +261,9 @@
           "id" : {
             "type" : "string"
           },
-          "title" : {
-            "type" : "string"
+          "citationType" : {
+            "type" : "string",
+            "enum" : [ "journal article", "book", "online journal article", "patent", "submission", "thesis", "UniProt indexed literatures", "unpublished observations" ]
           },
           "citationCrossReferences" : {
             "type" : "array",
@@ -285,9 +286,8 @@
           "publicationDate" : {
             "type" : "string"
           },
-          "citationType" : {
-            "type" : "string",
-            "enum" : [ "journal article", "book", "online journal article", "patent", "submission", "thesis", "UniProt indexed literatures", "unpublished observations" ]
+          "title" : {
+            "type" : "string"
           }
         },
         "allOf" : [ {
@@ -413,10 +413,6 @@
       "EntryAudit" : {
         "type" : "object",
         "properties" : {
-          "entryVersion" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
           "lastAnnotationUpdateDate" : {
             "type" : "string",
             "format" : "date"
@@ -425,11 +421,15 @@
             "type" : "string",
             "format" : "date"
           },
+          "sequenceVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "firstPublicDate" : {
             "type" : "string",
             "format" : "date"
           },
-          "sequenceVersion" : {
+          "entryVersion" : {
             "type" : "integer",
             "format" : "int32"
           }
@@ -438,6 +438,10 @@
       "EntryInactiveReason" : {
         "type" : "object",
         "properties" : {
+          "deletedReason" : {
+            "type" : "string",
+            "enum" : [ "", "Undefined", "Deleted from sequence source (EMBL)", "Deleted from sequence source (TAIR)", "Deleted from sequence source (SGD)", "Deleted from sequence source (ENSEMBL)", "Deleted from sequence source (PDB)", "Deleted from sequence source (RefSeq)", "Deleted from Swiss-Prot", "Redundant sequence", "Redundant proteome", "Excluded proteome", "Over-represented sequence", "Not part of a reference proteome" ]
+          },
           "inactiveReasonType" : {
             "type" : "string",
             "enum" : [ "DELETED", "MERGED", "DEMERGED" ]
@@ -447,10 +451,6 @@
             "items" : {
               "type" : "string"
             }
-          },
-          "deletedReason" : {
-            "type" : "string",
-            "enum" : [ "", "Undefined", "Deleted from sequence source (EMBL)", "Deleted from sequence source (TAIR)", "Deleted from sequence source (SGD)", "Deleted from sequence source (ENSEMBL)", "Deleted from sequence source (PDB)", "Deleted from sequence source (RefSeq)", "Deleted from Swiss-Prot", "Redundant sequence", "Redundant proteome", "Excluded proteome", "Over-represented sequence", "Not part of a reference proteome" ]
           }
         }
       },
@@ -474,11 +474,11 @@
           "name" : {
             "type" : "string"
           },
-          "reference" : {
-            "type" : "boolean"
-          },
           "evidenceDatabaseDetail" : {
             "$ref" : "#/components/schemas/EvidenceDatabaseDetail"
+          },
+          "reference" : {
+            "type" : "boolean"
           }
         }
       },
@@ -503,14 +503,14 @@
       "EvidenceLine" : {
         "type" : "object",
         "properties" : {
-          "evidence" : {
-            "type" : "string"
-          },
           "createDate" : {
             "type" : "string",
             "format" : "date"
           },
           "curator" : {
+            "type" : "string"
+          },
+          "evidence" : {
             "type" : "string"
           }
         }
@@ -532,12 +532,6 @@
       "Gene" : {
         "type" : "object",
         "properties" : {
-          "synonyms" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/GeneNameSynonym"
-            }
-          },
           "orderedLocusNames" : {
             "type" : "array",
             "items" : {
@@ -551,6 +545,12 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/ORFName"
+            }
+          },
+          "synonyms" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GeneNameSynonym"
             }
           }
         }
@@ -747,6 +747,9 @@
               "type" : "string"
             }
           },
+          "commonName" : {
+            "type" : "string"
+          },
           "synonyms" : {
             "type" : "array",
             "items" : {
@@ -754,9 +757,6 @@
             }
           },
           "scientificName" : {
-            "type" : "string"
-          },
-          "commonName" : {
             "type" : "string"
           },
           "evidences" : {
@@ -774,6 +774,9 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "commonName" : {
+            "type" : "string"
+          },
           "synonyms" : {
             "type" : "array",
             "items" : {
@@ -781,9 +784,6 @@
             }
           },
           "scientificName" : {
-            "type" : "string"
-          },
-          "commonName" : {
             "type" : "string"
           }
         }
@@ -815,14 +815,11 @@
       "ProteinDescription" : {
         "type" : "object",
         "properties" : {
-          "contains" : {
+          "alternativeNames" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/ProteinSection"
+              "$ref" : "#/components/schemas/ProteinName"
             }
-          },
-          "flag" : {
-            "type" : "string"
           },
           "recommendedName" : {
             "$ref" : "#/components/schemas/ProteinName"
@@ -857,11 +854,14 @@
               "$ref" : "#/components/schemas/Name"
             }
           },
-          "alternativeNames" : {
+          "contains" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/ProteinName"
+              "$ref" : "#/components/schemas/ProteinSection"
             }
+          },
+          "flag" : {
+            "type" : "string"
           }
         }
       },
@@ -891,6 +891,12 @@
       "ProteinSection" : {
         "type" : "object",
         "properties" : {
+          "alternativeNames" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProteinName"
+            }
+          },
           "recommendedName" : {
             "$ref" : "#/components/schemas/ProteinName"
           },
@@ -910,12 +916,6 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/Name"
-            }
-          },
-          "alternativeNames" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/ProteinName"
             }
           }
         }
@@ -994,6 +994,9 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "commonName" : {
+            "type" : "string"
+          },
           "synonyms" : {
             "type" : "array",
             "items" : {
@@ -1001,9 +1004,6 @@
             }
           },
           "scientificName" : {
-            "type" : "string"
-          },
-          "commonName" : {
             "type" : "string"
           }
         }
@@ -1102,11 +1102,9 @@
               "type" : "object"
             }
           },
-          "features" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/UniProtKBFeature"
-            }
+          "entryType" : {
+            "type" : "string",
+            "enum" : [ "UniProtKB reviewed (Swiss-Prot)", "UniProtKB unreviewed (TrEMBL)", "Inactive", "UNKNOWN" ]
           },
           "secondaryAccessions" : {
             "type" : "array",
@@ -1117,15 +1115,11 @@
           "proteinDescription" : {
             "$ref" : "#/components/schemas/ProteinDescription"
           },
-          "keywords" : {
+          "uniProtKBCrossReferences" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/Keyword"
+              "$ref" : "#/components/schemas/UniProtKBCrossReference"
             }
-          },
-          "entryType" : {
-            "type" : "string",
-            "enum" : [ "UniProtKB reviewed (Swiss-Prot)", "UniProtKB unreviewed (TrEMBL)", "Inactive", "UNKNOWN" ]
           },
           "annotationScore" : {
             "type" : "number",
@@ -1158,6 +1152,12 @@
               "$ref" : "#/components/schemas/GeneLocation"
             }
           },
+          "keywords" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Keyword"
+            }
+          },
           "sequence" : {
             "$ref" : "#/components/schemas/Sequence"
           },
@@ -1166,18 +1166,6 @@
           },
           "fragment" : {
             "type" : "boolean"
-          },
-          "uniProtKBCrossReferences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/UniProtKBCrossReference"
-            }
-          },
-          "primaryAccession" : {
-            "type" : "string"
-          },
-          "inactiveReason" : {
-            "$ref" : "#/components/schemas/EntryInactiveReason"
           },
           "proteinExistence" : {
             "type" : "string",
@@ -1195,11 +1183,23 @@
               "$ref" : "#/components/schemas/TaxonomyLineage"
             }
           },
+          "features" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UniProtKBFeature"
+            }
+          },
           "references" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/UniProtKBReference"
             }
+          },
+          "primaryAccession" : {
+            "type" : "string"
+          },
+          "inactiveReason" : {
+            "$ref" : "#/components/schemas/EntryInactiveReason"
           }
         }
       },
@@ -1209,14 +1209,14 @@
           "alternativeSequence" : {
             "$ref" : "#/components/schemas/AlternativeSequence"
           },
-          "featureId" : {
-            "type" : "string"
-          },
           "ligand" : {
             "$ref" : "#/components/schemas/Ligand"
           },
           "ligandPart" : {
             "$ref" : "#/components/schemas/LigandPart"
+          },
+          "featureId" : {
+            "type" : "string"
           },
           "location" : {
             "$ref" : "#/components/schemas/FeatureLocation"
@@ -1245,24 +1245,24 @@
       "UniProtKBReference" : {
         "type" : "object",
         "properties" : {
-          "citation" : {
-            "$ref" : "#/components/schemas/Citation"
-          },
-          "referenceNumber" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
           "referencePositions" : {
             "type" : "array",
             "items" : {
               "type" : "string"
             }
           },
+          "referenceNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "referenceComments" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/ReferenceComment"
             }
+          },
+          "citation" : {
+            "$ref" : "#/components/schemas/Citation"
           },
           "evidences" : {
             "type" : "array",
@@ -1279,11 +1279,11 @@
             "type" : "integer",
             "format" : "int32"
           },
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
           "approximate" : {
             "type" : "boolean"
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           },
           "evidences" : {
             "type" : "array",
@@ -1659,17 +1659,17 @@
       "Disease" : {
         "type" : "object",
         "properties" : {
-          "acronym" : {
-            "type" : "string"
-          },
-          "diseaseId" : {
-            "type" : "string"
-          },
           "diseaseAccession" : {
             "type" : "string"
           },
           "diseaseCrossReference" : {
             "$ref" : "#/components/schemas/CrossReferenceDiseaseDatabase"
+          },
+          "diseaseId" : {
+            "type" : "string"
+          },
+          "acronym" : {
+            "type" : "string"
           },
           "description" : {
             "type" : "string"
@@ -2734,9 +2734,6 @@
       "AlternativeProductsComment" : {
         "type" : "object",
         "properties" : {
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
           "isoforms" : {
             "type" : "array",
             "items" : {
@@ -2749,15 +2746,15 @@
               "type" : "string",
               "enum" : [ "Alternative promoter usage", "Alternative splicing", "Alternative initiation", "Ribosomal frameshifting" ]
             }
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           }
         }
       },
       "MichaelisConstant" : {
         "type" : "object",
         "properties" : {
-          "substrate" : {
-            "type" : "string"
-          },
           "constant" : {
             "type" : "number",
             "format" : "double"
@@ -2765,6 +2762,9 @@
           "unit" : {
             "type" : "string",
             "enum" : [ "M", "mM", "uM", "nM", "mg/mL", "mg/ml" ]
+          },
+          "substrate" : {
+            "type" : "string"
           },
           "evidences" : {
             "type" : "array",
@@ -2777,15 +2777,15 @@
       "SequenceCautionComment" : {
         "type" : "object",
         "properties" : {
+          "sequenceCautionType" : {
+            "type" : "string",
+            "enum" : [ "Frameshift", "Erroneous initiation", "Erroneous termination", "Erroneous gene model prediction", "Erroneous translation", "Miscellaneous discrepancy", "unknown" ]
+          },
           "sequence" : {
             "type" : "string"
           },
           "note" : {
             "type" : "string"
-          },
-          "sequenceCautionType" : {
-            "type" : "string",
-            "enum" : [ "Frameshift", "Erroneous initiation", "Erroneous termination", "Erroneous gene model prediction", "Erroneous translation", "Miscellaneous discrepancy", "unknown" ]
           },
           "evidences" : {
             "type" : "array",
@@ -2801,7 +2801,7 @@
       "Interactant" : {
         "type" : "object",
         "properties" : {
-          "uniProtKBAccession" : {
+          "geneName" : {
             "type" : "string"
           },
           "chainId" : {
@@ -2810,7 +2810,7 @@
           "intActId" : {
             "type" : "string"
           },
-          "geneName" : {
+          "uniProtKBAccession" : {
             "type" : "string"
           }
         }
@@ -2821,12 +2821,12 @@
           "unit" : {
             "type" : "string"
           },
+          "enzyme" : {
+            "type" : "string"
+          },
           "velocity" : {
             "type" : "number",
             "format" : "double"
-          },
-          "enzyme" : {
-            "type" : "string"
           },
           "evidences" : {
             "type" : "array",
@@ -2901,14 +2901,14 @@
       "CatalyticActivityComment" : {
         "type" : "object",
         "properties" : {
+          "reaction" : {
+            "$ref" : "#/components/schemas/Reaction"
+          },
           "physiologicalReactions" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/PhysiologicalReaction"
             }
-          },
-          "reaction" : {
-            "$ref" : "#/components/schemas/Reaction"
           },
           "molecule" : {
             "type" : "string"
@@ -2918,11 +2918,11 @@
       "DiseaseComment" : {
         "type" : "object",
         "properties" : {
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
           "disease" : {
             "$ref" : "#/components/schemas/Disease"
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           },
           "molecule" : {
             "type" : "string"
@@ -2982,17 +2982,17 @@
       "WebResourceComment" : {
         "type" : "object",
         "properties" : {
-          "note" : {
-            "type" : "string"
-          },
-          "resourceName" : {
-            "type" : "string"
-          },
           "resourceUrl" : {
             "type" : "string"
           },
           "ftp" : {
             "type" : "boolean"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "resourceName" : {
+            "type" : "string"
           },
           "molecule" : {
             "type" : "string"
@@ -3005,14 +3005,14 @@
           "valid" : {
             "type" : "boolean"
           },
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
           "cofactors" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/Cofactor"
             }
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           },
           "molecule" : {
             "type" : "string"
@@ -3022,18 +3022,18 @@
       "RnaEditingComment" : {
         "type" : "object",
         "properties" : {
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
-          "locationType" : {
-            "type" : "string",
-            "enum" : [ "Not_applicable", "Undetermined", "Unknown", "Known" ]
-          },
           "positions" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/RnaEdPosition"
             }
+          },
+          "locationType" : {
+            "type" : "string",
+            "enum" : [ "Not_applicable", "Undetermined", "Unknown", "Known" ]
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           },
           "molecule" : {
             "type" : "string"
@@ -3068,9 +3068,6 @@
       "Interaction" : {
         "type" : "object",
         "properties" : {
-          "interactantTwo" : {
-            "$ref" : "#/components/schemas/Interactant"
-          },
           "numberOfExperiments" : {
             "type" : "integer",
             "format" : "int32"
@@ -3080,6 +3077,9 @@
           },
           "organismDiffer" : {
             "type" : "boolean"
+          },
+          "interactantTwo" : {
+            "$ref" : "#/components/schemas/Interactant"
           }
         }
       },
@@ -3107,9 +3107,6 @@
           "kineticParameters" : {
             "$ref" : "#/components/schemas/KineticParameters"
           },
-          "temperatureDependence" : {
-            "$ref" : "#/components/schemas/TemperatureDependence"
-          },
           "absorption" : {
             "$ref" : "#/components/schemas/Absorption"
           },
@@ -3118,6 +3115,9 @@
           },
           "redoxPotential" : {
             "$ref" : "#/components/schemas/RedoxPotential"
+          },
+          "temperatureDependence" : {
+            "$ref" : "#/components/schemas/TemperatureDependence"
           },
           "molecule" : {
             "type" : "string"
@@ -3150,14 +3150,14 @@
       "SubcellularLocationComment" : {
         "type" : "object",
         "properties" : {
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
           "subcellularLocations" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/SubcellularLocation"
             }
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           },
           "molecule" : {
             "type" : "string"
@@ -3170,14 +3170,9 @@
           "name" : {
             "$ref" : "#/components/schemas/IsoformName"
           },
-          "synonyms" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/IsoformName"
-            }
-          },
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
+          "isoformSequenceStatus" : {
+            "type" : "string",
+            "enum" : [ "Displayed", "External", "Not described", "Described" ]
           },
           "isoformIds" : {
             "type" : "array",
@@ -3191,18 +3186,20 @@
               "type" : "string"
             }
           },
-          "isoformSequenceStatus" : {
-            "type" : "string",
-            "enum" : [ "Displayed", "External", "Not described", "Described" ]
+          "synonyms" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/IsoformName"
+            }
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           }
         }
       },
       "KineticParameters" : {
         "type" : "object",
         "properties" : {
-          "note" : {
-            "$ref" : "#/components/schemas/Note"
-          },
           "maximumVelocities" : {
             "type" : "array",
             "items" : {
@@ -3214,6 +3211,9 @@
             "items" : {
               "$ref" : "#/components/schemas/MichaelisConstant"
             }
+          },
+          "note" : {
+            "$ref" : "#/components/schemas/Note"
           }
         }
       },
@@ -3256,8 +3256,11 @@
             "type" : "string",
             "enum" : [ "Electrospray", "FAB", "LSI", "MALDI", "Plasma desorption", "SELDI", "API", "Unknown" ]
           },
-          "note" : {
-            "type" : "string"
+          "evidences" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Evidence"
+            }
           },
           "molWeight" : {
             "type" : "number",
@@ -3267,11 +3270,8 @@
             "type" : "number",
             "format" : "float"
           },
-          "evidences" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Evidence"
-            }
+          "note" : {
+            "type" : "string"
           },
           "molecule" : {
             "type" : "string"
@@ -3295,18 +3295,18 @@
       "Literature" : {
         "type" : "object",
         "properties" : {
-          "literatureAbstract" : {
-            "type" : "string"
-          },
-          "completeAuthorList" : {
-            "type" : "boolean"
-          },
           "pubmedId" : {
             "type" : "integer",
             "format" : "int64"
           },
           "doiId" : {
             "type" : "string"
+          },
+          "literatureAbstract" : {
+            "type" : "string"
+          },
+          "completeAuthorList" : {
+            "type" : "boolean"
           },
           "firstPage" : {
             "type" : "string"
@@ -3323,9 +3323,6 @@
           "id" : {
             "type" : "string"
           },
-          "title" : {
-            "type" : "string"
-          },
           "citationCrossReferences" : {
             "type" : "array",
             "items" : {
@@ -3345,6 +3342,9 @@
             }
           },
           "publicationDate" : {
+            "type" : "string"
+          },
+          "title" : {
             "type" : "string"
           }
         }
@@ -3359,9 +3359,6 @@
           "id" : {
             "type" : "string"
           },
-          "title" : {
-            "type" : "string"
-          },
           "citationCrossReferences" : {
             "type" : "array",
             "items" : {
@@ -3381,6 +3378,9 @@
             }
           },
           "publicationDate" : {
+            "type" : "string"
+          },
+          "title" : {
             "type" : "string"
           }
         }
@@ -3388,16 +3388,13 @@
       "ElectronicArticle" : {
         "type" : "object",
         "properties" : {
-          "locator" : {
-            "type" : "string"
-          },
           "journal" : {
             "type" : "string"
           },
-          "id" : {
+          "locator" : {
             "type" : "string"
           },
-          "title" : {
+          "id" : {
             "type" : "string"
           },
           "citationCrossReferences" : {
@@ -3419,6 +3416,9 @@
             }
           },
           "publicationDate" : {
+            "type" : "string"
+          },
+          "title" : {
             "type" : "string"
           }
         }
@@ -3435,9 +3435,6 @@
           "id" : {
             "type" : "string"
           },
-          "title" : {
-            "type" : "string"
-          },
           "citationCrossReferences" : {
             "type" : "array",
             "items" : {
@@ -3458,6 +3455,9 @@
           },
           "publicationDate" : {
             "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
           }
         }
       },
@@ -3466,6 +3466,15 @@
         "properties" : {
           "address" : {
             "type" : "string"
+          },
+          "bookName" : {
+            "type" : "string"
+          },
+          "editors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           },
           "firstPage" : {
             "type" : "string"
@@ -3479,19 +3488,7 @@
           "publisher" : {
             "type" : "string"
           },
-          "bookName" : {
-            "type" : "string"
-          },
-          "editors" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
           "id" : {
-            "type" : "string"
-          },
-          "title" : {
             "type" : "string"
           },
           "citationCrossReferences" : {
@@ -3513,6 +3510,9 @@
             }
           },
           "publicationDate" : {
+            "type" : "string"
+          },
+          "title" : {
             "type" : "string"
           }
         }
@@ -3526,9 +3526,6 @@
           "id" : {
             "type" : "string"
           },
-          "title" : {
-            "type" : "string"
-          },
           "citationCrossReferences" : {
             "type" : "array",
             "items" : {
@@ -3548,6 +3545,9 @@
             }
           },
           "publicationDate" : {
+            "type" : "string"
+          },
+          "title" : {
             "type" : "string"
           }
         }
@@ -3570,9 +3570,6 @@
           "id" : {
             "type" : "string"
           },
-          "title" : {
-            "type" : "string"
-          },
           "citationCrossReferences" : {
             "type" : "array",
             "items" : {
@@ -3592,6 +3589,9 @@
             }
           },
           "publicationDate" : {
+            "type" : "string"
+          },
+          "title" : {
             "type" : "string"
           }
         }
