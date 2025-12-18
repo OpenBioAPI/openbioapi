@@ -1,0 +1,22 @@
+name: Update API Specs
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  # schedule:
+  #   - cron: '0 0 * * *'  # Daily at midnight UTC
+
+jobs:
+  update-specs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Execute babashka script
+        uses: tzafrirben/babashka-docker-action@v1
+        with:
+          bb_src: ../scripts/update_api_specs.clj
