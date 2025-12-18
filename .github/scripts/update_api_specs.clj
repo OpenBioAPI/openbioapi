@@ -47,7 +47,7 @@
 
 (defn -main []
   (let [config (edn/read-string (slurp ".github/scripts/update-config.edn"))](doall
-    (pmap (fn [spec]
+    (map (fn [spec]
             (process-spec spec))
           (:openbioapi.update-config/specs config)))))
 
