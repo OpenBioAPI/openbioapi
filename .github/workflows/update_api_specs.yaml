@@ -17,6 +17,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Execute babashka script
-        uses: tzafrirben/babashka-docker-action@v1
+        uses: tzafrirben/babashka-docker-action@v1.1
         with:
           bb_src: ../scripts/update_api_specs.clj
