@@ -46,7 +46,7 @@
         (println (str "Skipping " id " due to fetch failure."))))))
 
 (defn -main []
-  (let [config (edn/read-string (slurp "update-config.edn"))](doall
+  (let [config (edn/read-string (slurp ".github/scripts/update-config.edn"))](doall
     (pmap (fn [spec]
             (process-spec spec))
           (:openbioapi.update-config/specs config)))))
